@@ -10,7 +10,7 @@ import type { UserTemplate } from '@/api/endpoints';
 type CreationType = 'idea' | 'outline' | 'description';
 
 const templates = [
-  { id: '1', name: '简约商务', preview: '' },
+  { id: '1', name: '简约商务', preview: '/templates/template_s.png' },
   { id: '2', name: '活力色彩', preview: '/templates/template_g.png' },
   { id: '3', name: '科技蓝', preview: '/templates/template_b.png' },
 ];
@@ -42,9 +42,9 @@ export const Home: React.FC = () => {
     },
     outline: {
       icon: <FileText size={20} />,
-      label: '从大纲生成（未完善，但可手动编辑大纲卡片）',
+      label: '从大纲生成',
       placeholder: '粘贴你的 PPT 大纲...\n\n例如：\n第一部分：AI 的起源\n- 1950 年代的开端\n- 达特茅斯会议\n\n第二部分：发展历程\n...',
-      description: '已有大纲？直接粘贴即可快速生成',
+      description: '已有大纲？直接粘贴即可快速生成，AI 将自动切分为结构化大纲',
     },
     description: {
       icon: <FileEdit size={20} />,
@@ -240,7 +240,7 @@ export const Home: React.FC = () => {
           {/* 模板选择 */}
           <div className="mb-8">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              🎨 选择风格模板 (可选)
+              🎨 选择风格模板
             </h3>
             
             {/* 用户已保存的模板 */}
