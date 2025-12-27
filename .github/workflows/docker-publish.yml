@@ -1,6 +1,7 @@
 name: Build and Push to Docker Hub
 
-# 在 CI 测试通过后自动构建并推送镜像到 Docker Hub
+# 在测试通过后自动构建并推送镜像到 Docker Hub
+
 # 触发条件：
 # 1. CI workflow (Full Test Suite) 成功完成后（主要触发方式）
 # 2. 手动触发（workflow_dispatch）
