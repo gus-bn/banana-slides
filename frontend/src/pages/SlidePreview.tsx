@@ -52,7 +52,12 @@ export const SlidePreview: React.FC = () => {
     pageGeneratingTasks,
   } = useProjectStore();
   
-  const { addTask, pollTask: pollExportTask, tasks: exportTasks } = useExportTasksStore();
+  const { addTask, pollTask: pollExportTask, tasks: exportTasks, restoreActiveTasks } = useExportTasksStore();
+
+  // 页面挂载时恢复正在进行的导出任务（页面刷新后）
+  useEffect(() => {
+    restoreActiveTasks();
+  }, [restoreActiveTasks]);
 
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);

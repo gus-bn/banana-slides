@@ -195,7 +195,7 @@ interface ExportTasksPanelProps {
 
 export const ExportTasksPanel: React.FC<ExportTasksPanelProps> = ({ projectId, pages = [], className }) => {
   const [isExpanded, setIsExpanded] = useState(true);
-  const { tasks, removeTask, clearCompleted } = useExportTasksStore();
+  const { tasks, removeTask, clearCompleted, restoreActiveTasks } = useExportTasksStore();
   
   // Filter tasks for current project if projectId is provided
   const filteredTasks = projectId 
@@ -208,6 +208,11 @@ export const ExportTasksPanel: React.FC<ExportTasksPanelProps> = ({ projectId, p
   const completedTasks = filteredTasks.filter(
     task => task.status === 'COMPLETED' || task.status === 'FAILED'
   );
+  
+  // 当组件挂载时，恢复所有正在进行的任务并重新开始轮询
+  useEffect(() => {
+    restoreActiveTasks();
+  }, []); // 只在组件挂载时执行一次
   
   // 当有进行中的任务时，自动展开面板
   useEffect(() => {
