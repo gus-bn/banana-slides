@@ -101,7 +101,7 @@ const debouncedUpdatePage = debounce(
   setGlobalLoading: (loading) => set({ isGlobalLoading: loading }),
   setError: (error) => set({ error }),
 
-  // 初始化项目
+  // Initialize project
   initializeProject: async (type, content, templateImage, templateStyle) => {
     set({ isGlobalLoading: true, error: null });
     try {
@@ -115,62 +115,62 @@ const debouncedUpdatePage = debounce(
         request.description_text = content;
       }
       
-      // 添加风格描述（如果有）
+      // Add style description (if any)
       if (templateStyle && templateStyle.trim()) {
         request.template_style = templateStyle.trim();
       }
       
-      // 1. 创建项目
+      // 1. Create project
       const response = await api.createProject(request);
       const projectId = response.data?.project_id;
       
       if (!projectId) {
-        throw new Error('项目创建失败：未返回项目ID');
+        throw new Error('Project creation failed: No project ID returned');
       }
       
-      // 2. 如果有模板图片，上传模板
+      // 2. If there is a template image, upload template
       if (templateImage) {
         try {
           await api.uploadTemplate(projectId, templateImage);
         } catch (error) {
-          console.warn('模板上传失败:', error);
-          // 模板上传失败不影响项目创建，继续执行
+          console.warn('Template upload failed:', error);
+          // Template upload failure does not affect project creation, continue execution
         }
       }
       
-      // 3. 如果是 description 类型，自动生成大纲和页面描述
+      // 3. If it is description type, auto-generate outline and page descriptions
       if (type === 'description') {
         try {
           await api.generateFromDescription(projectId, content);
-          console.log('[初始化项目] 从描述生成大纲和页面描述完成');
+          console.log('[initializeProject] Generating outline and page descriptions from description completed');
         } catch (error) {
-          console.error('[初始化项目] 从描述生成失败:', error);
-          // 继续执行，让用户可以手动操作
+          console.error('[initializeProject] Generation from description failed:', error);
+          // Continue execution to let user operate manually
         }
       }
       
-      // 4. 获取完整项目信息
+      // 4. Get full project information
       const projectResponse = await api.getProject(projectId);
       const project = normalizeProject(projectResponse.data);
       
       if (project) {
         set({ currentProject: project });
-        // 保存到 localStorage
+        // Save to localStorage
         localStorage.setItem('currentProjectId', project.id!);
       }
     } catch (error: any) {
-      set({ error: normalizeErrorMessage(error.message || '创建项目失败') });
+      set({ error: normalizeErrorMessage(error.message || 'Failed to create project') });
       throw error;
     } finally {
       set({ isGlobalLoading: false });
     }
   },
 
-  // 同步项目数据
+  // Sync project data
   syncProject: async (projectId?: string) => {
     const { currentProject } = get();
     
-    // 如果没有提供 projectId，尝试从 currentProject 或 localStorage 获取
+    // If projectId is not provided, try to get it from currentProject or localStorage
     let targetProjectId = projectId;
     if (!targetProjectId) {
       if (currentProject?.id) {
@@ -181,7 +181,7 @@ const debouncedUpdatePage = debounce(
     }
     
     if (!targetProjectId) {
-      console.warn('syncProject: 没有可用的项目ID');
+      console.warn('syncProject: No project ID available');
       return;
     }
 
@@ -189,48 +189,48 @@ const debouncedUpdatePage = debounce(
       const response = await api.getProject(targetProjectId);
       if (response.data) {
         const project = normalizeProject(response.data);
-        console.log('[syncProject] 同步项目数据:', {
+        console.log('[syncProject] Syncing project data:', {
           projectId: project.id,
           pagesCount: project.pages?.length || 0,
           status: project.status
         });
         set({ currentProject: project });
-        // 确保 localStorage 中保存了项目ID
+        // Ensure project ID is saved in localStorage
         localStorage.setItem('currentProjectId', project.id!);
       }
     } catch (error: any) {
-      // 提取更详细的错误信息
-      let errorMessage = '同步项目失败';
+      // Extract more detailed error information
+      let errorMessage = 'Failed to sync project';
       let shouldClearStorage = false;
       
       if (error.response) {
-        // 服务器返回了错误响应
+        // Server returned an error response
         const errorData = error.response.data;
         if (error.response.status === 404) {
-          // 404错误：项目不存在，清除localStorage
-          errorMessage = errorData?.error?.message || '项目不存在，可能已被删除';
+          // 404 error: project does not exist, clear localStorage
+          errorMessage = errorData?.error?.message || 'Project does not exist, may have been deleted';
           shouldClearStorage = true;
         } else if (errorData?.error?.message) {
-          // 从后端错误格式中提取消息
+          // Extract message from backend error format
           errorMessage = errorData.error.message;
         } else if (errorData?.message) {
           errorMessage = errorData.message;
         } else if (errorData?.error) {
-          errorMessage = typeof errorData.error === 'string' ? errorData.error : errorData.error.message || '请求失败';
+          errorMessage = typeof errorData.error === 'string' ? errorData.error : errorData.error.message || 'Request failed';
         } else {
-          errorMessage = `请求失败: ${error.response.status}`;
+          errorMessage = `Request failed: ${error.response.status}`;
         }
       } else if (error.request) {
-        // 请求已发送但没有收到响应
-        errorMessage = '网络错误，请检查后端服务是否启动';
+        // Request was sent but no response was received
+        errorMessage = 'Network error, please check if backend service is running';
       } else if (error.message) {
-        // 其他错误
+        // Other errors
         errorMessage = error.message;
       }
       
-      // 如果项目不存在，清除localStorage并重置当前项目
+      // If project does not exist, clear localStorage and reset current project
       if (shouldClearStorage) {
-        console.warn('[syncProject] 项目不存在，清除localStorage');
+        console.warn('[syncProject] Project does not exist, clearing localStorage');
         localStorage.removeItem('currentProjectId');
         set({ currentProject: null, error: normalizeErrorMessage(errorMessage) });
       } else {
@@ -272,12 +272,12 @@ const debouncedUpdatePage = debounce(
     await get().syncProject(currentProject.id);
   },
 
-  // 重新排序页面
+  // Reorder pages
   reorderPages: async (newOrder) => {
     const { currentProject } = get();
     if (!currentProject) return;
 
-    // 乐观更新
+    // Optimistic update
     const reorderedPages = newOrder
       .map((id) => currentProject.pages.find((p) => p.id === id))
       .filter(Boolean) as any[];
@@ -292,20 +292,20 @@ const debouncedUpdatePage = debounce(
     try {
       await api.updatePagesOrder(currentProject.id, newOrder);
     } catch (error: any) {
-      set({ error: error.message || '更新顺序失败' });
-      // 失败后重新同步
+      set({ error: error.message || 'Failed to update order' });
+      // Resync after failure
       await get().syncProject();
     }
   },
 
-  // 添加新页面
+  // Add new page
   addNewPage: async () => {
     const { currentProject } = get();
     if (!currentProject) return;
 
     try {
       const newPage = {
-        outline_content: { title: '新页面', points: [] },
+        outline_content: { title: 'New Page', points: [] },
         order_index: currentProject.pages.length,
       };
       
@@ -314,11 +314,11 @@ const debouncedUpdatePage = debounce(
         await get().syncProject();
       }
     } catch (error: any) {
-      set({ error: error.message || '添加页面失败' });
+      set({ error: error.message || 'Failed to add page' });
     }
   },
 
-  // 删除页面
+  // Delete page
   deletePageById: async (pageId) => {
     const { currentProject } = get();
     if (!currentProject) return;
@@ -327,69 +327,69 @@ const debouncedUpdatePage = debounce(
       await api.deletePage(currentProject.id, pageId);
       await get().syncProject();
     } catch (error: any) {
-      set({ error: error.message || '删除页面失败' });
+      set({ error: error.message || 'Failed to delete page' });
     }
   },
 
-  // 启动异步任务
+  // Start async task
   startAsyncTask: async (apiCall) => {
-    console.log('[异步任务] 启动异步任务...');
+    console.log('[Async Task] Starting async task...');
     set({ isGlobalLoading: true, error: null });
     try {
       const response = await apiCall();
-      console.log('[异步任务] API响应:', response);
+      console.log('[Async Task] API response:', response);
       
-      // task_id 在 response.data 中
+      // task_id is in response.data
       const taskId = response.data?.task_id;
       if (taskId) {
-        console.log('[异步任务] 收到task_id:', taskId, '开始轮询...');
+        console.log('[Async Task] Received task_id:', taskId, 'starting polling...');
         set({ activeTaskId: taskId });
         await get().pollTask(taskId);
       } else {
-        console.warn('[异步任务] 响应中没有task_id，可能是同步操作:', response);
-        // 同步操作完成后，刷新项目数据
+        console.warn('[Async Task] No task_id in response, may be a synchronous operation:', response);
+        // Refresh project data after sync operation
         await get().syncProject();
         set({ isGlobalLoading: false });
       }
     } catch (error: any) {
-      console.error('[异步任务] 启动失败:', error);
-      set({ error: error.message || '任务启动失败', isGlobalLoading: false });
+      console.error('[Async Task] Start failed:', error);
+      set({ error: error.message || 'Task start failed', isGlobalLoading: false });
       throw error;
     }
   },
 
-  // 轮询任务状态
+  // Poll task status
   pollTask: async (taskId) => {
-    console.log(`[轮询] 开始轮询任务: ${taskId}`);
+    console.log(`[Polling] Starting polling for task: ${taskId}`);
     const { currentProject } = get();
     if (!currentProject) {
-      console.warn('[轮询] 没有当前项目，停止轮询');
+      console.warn('[Polling] No current project, stopping polling');
       return;
     }
 
     const poll = async () => {
       try {
-        console.log(`[轮询] 查询任务状态: ${taskId}`);
+        console.log(`[Polling] Querying task status: ${taskId}`);
         const response = await api.getTaskStatus(currentProject.id!, taskId);
         const task = response.data;
         
         if (!task) {
-          console.warn('[轮询] 响应中没有任务数据');
+          console.warn('[Polling] No task data in response');
           return;
         }
 
-        // 更新进度
+        // Update progress
         if (task.progress) {
           set({ taskProgress: task.progress });
         }
 
-        console.log(`[轮询] Task ${taskId} 状态: ${task.status}`, task);
+        console.log(`[Polling] Task ${taskId} status: ${task.status}`, task);
 
-        // 检查任务状态
+        // Check task status
         if (task.status === 'COMPLETED') {
-          console.log(`[轮询] Task ${taskId} 已完成，刷新项目数据`);
+          console.log(`[Polling] Task ${taskId} completed, refreshing project data`);
           
-          // 如果是导出可编辑PPTX任务，检查是否有下载链接
+          // If exporting editable PPTX task, check for download link
           if (task.task_type === 'EXPORT_EDITABLE_PPTX' && task.progress) {
             const progress = typeof task.progress === 'string' 
               ? JSON.parse(task.progress) 
@@ -397,13 +397,13 @@ const debouncedUpdatePage = debounce(
             
             const downloadUrl = progress?.download_url;
             if (downloadUrl) {
-              console.log('[导出可编辑PPTX] 从任务响应中获取下载链接:', downloadUrl);
-              // 延迟一下，确保状态更新完成后再打开下载链接
+              console.log('[Export Editable PPTX] Get download link from task response:', downloadUrl);
+              // Delay slightly to ensure state update completes before opening download link
               setTimeout(() => {
                 window.open(downloadUrl, '_blank');
               }, 500);
             } else {
-              console.warn('[导出可编辑PPTX] 任务完成但没有下载链接');
+              console.warn('[Export Editable PPTX] Task completed but no download link');
             }
           }
           
@@ -412,34 +412,34 @@ const debouncedUpdatePage = debounce(
             taskProgress: null, 
             isGlobalLoading: false 
           });
-          // 刷新项目数据
+          // Refresh project data
           await get().syncProject();
         } else if (task.status === 'FAILED') {
-          console.error(`[轮询] Task ${taskId} 失败:`, task.error_message || task.error);
+          console.error(`[Polling] Task ${taskId} failed:`, task.error_message || task.error);
           set({ 
-            error: normalizeErrorMessage(task.error_message || task.error || '任务失败'),
+            error: normalizeErrorMessage(task.error_message || task.error || 'Task failed'),
             activeTaskId: null,
             taskProgress: null,
             isGlobalLoading: false
           });
         } else if (task.status === 'PENDING' || task.status === 'PROCESSING') {
-          // 继续轮询（PENDING 或 PROCESSING）
-          console.log(`[轮询] Task ${taskId} 处理中，2秒后继续轮询...`);
+          // Continue polling (PENDING or PROCESSING)
+          console.log(`[Polling] Task ${taskId} processing, continuing polling in 2s...`);
           setTimeout(poll, 2000);
         } else {
-          // 未知状态，停止轮询
-          console.warn(`[轮询] Task ${taskId} 未知状态: ${task.status}，停止轮询`);
+          // Unknown status, stop polling
+          console.warn(`[Polling] Task ${taskId} unknown status: ${task.status}, stopping polling`);
           set({ 
-            error: `未知任务状态: ${task.status}`,
+            error: `Unknown task status: ${task.status}`,
             activeTaskId: null,
             taskProgress: null,
             isGlobalLoading: false
           });
         }
       } catch (error: any) {
-        console.error('任务轮询错误:', error);
+        console.error('Task polling error:', error);
         set({ 
-          error: normalizeErrorMessage(error.message || '任务查询失败'),
+          error: normalizeErrorMessage(error.message || 'Task status query failed'),
           activeTaskId: null,
           isGlobalLoading: false
         });
@@ -449,7 +449,7 @@ const debouncedUpdatePage = debounce(
     await poll();
   },
 
-  // 生成大纲（同步操作，不需要轮询）
+  // Generate outline (sync operation, no polling needed)
   generateOutline: async () => {
     const { currentProject } = get();
     if (!currentProject) return;
@@ -457,24 +457,24 @@ const debouncedUpdatePage = debounce(
     set({ isGlobalLoading: true, error: null });
     try {
       const response = await api.generateOutline(currentProject.id!);
-      console.log('[生成大纲] API响应:', response);
+      console.log('[Generate Outline] API response:', response);
       
-      // 刷新项目数据，确保获取最新的大纲页面
+      // Refresh project data to ensure getting latest outline pages
       await get().syncProject();
       
-      // 再次确认数据已更新
+      // Re-verify data updated
       const { currentProject: updatedProject } = get();
-      console.log('[生成大纲] 刷新后的项目:', updatedProject?.pages.length, '个页面');
+      console.log('[Generate Outline] Refreshed project:', updatedProject?.pages.length, 'pages');
     } catch (error: any) {
-      console.error('[生成大纲] 错误:', error);
-      set({ error: error.message || '生成大纲失败' });
+      console.error('[Generate Outline] Error:', error);
+      set({ error: error.message || 'Failed to generate outline' });
       throw error;
     } finally {
       set({ isGlobalLoading: false });
     }
   },
 
-  // 从描述生成大纲和页面描述（同步操作）
+  // Generate outline and page descriptions from description text (sync operation)
   generateFromDescription: async () => {
     const { currentProject } = get();
     if (!currentProject) return;
@@ -482,24 +482,24 @@ const debouncedUpdatePage = debounce(
     set({ isGlobalLoading: true, error: null });
     try {
       const response = await api.generateFromDescription(currentProject.id!);
-      console.log('[从描述生成] API响应:', response);
+      console.log('[Generate from Desc] API response:', response);
       
-      // 刷新项目数据，确保获取最新的大纲和描述
+      // Refresh project data to ensure getting latest outline and descriptions
       await get().syncProject();
       
-      // 再次确认数据已更新
+      // Re-verify data updated
       const { currentProject: updatedProject } = get();
-      console.log('[从描述生成] 刷新后的项目:', updatedProject?.pages.length, '个页面');
+      console.log('[Generate from Desc] Refreshed project:', updatedProject?.pages.length, 'pages');
     } catch (error: any) {
-      console.error('[从描述生成] 错误:', error);
-      set({ error: error.message || '从描述生成失败' });
+      console.error('[Generate from Desc] Error:', error);
+      set({ error: error.message || 'Failed to generate from description' });
       throw error;
     } finally {
       set({ isGlobalLoading: false });
     }
   },
 
-  // 生成描述（使用异步任务，实时显示进度）
+  // Generate descriptions (using async task, real-time progress)
   generateDescriptions: async () => {
     const { currentProject } = get();
     if (!currentProject || !currentProject.id) return;
@@ -509,7 +509,7 @@ const debouncedUpdatePage = debounce(
 
     set({ error: null });
     
-    // 标记所有页面为生成中
+    // Mark all pages as generating
     const initialTasks: Record<string, boolean> = {};
     pages.forEach((page) => {
       if (page.id) {
@@ -519,44 +519,44 @@ const debouncedUpdatePage = debounce(
     set({ pageDescriptionGeneratingTasks: initialTasks });
     
     try {
-      // 调用批量生成接口，返回 task_id
+      // Call batch generate API, returns task_id
       const projectId = currentProject.id;
       if (!projectId) {
-        throw new Error('项目ID不存在');
+        throw new Error('Project ID missing');
       }
       
       const response = await api.generateDescriptions(projectId);
       const taskId = response.data?.task_id;
       
       if (!taskId) {
-        throw new Error('未收到任务ID');
+        throw new Error('Task ID not received');
       }
       
-      // 启动轮询任务状态和定期同步项目数据
+      // Start polling task status and periodic project sync
       const pollAndSync = async () => {
         try {
-          // 轮询任务状态
+          // Poll task status
           const taskResponse = await api.getTaskStatus(projectId, taskId);
           const task = taskResponse.data;
           
           if (task) {
-            // 更新进度
+            // Update progress
             if (task.progress) {
               set({ taskProgress: task.progress });
             }
             
-            // 同步项目数据以获取最新的页面状态
+            // Sync project data to get latest page status
             await get().syncProject();
             
-            // 根据项目数据更新每个页面的生成状态
+            // Update generation status for each page based on project data
             const { currentProject: updatedProject } = get();
             if (updatedProject) {
               const updatedTasks: Record<string, boolean> = {};
               updatedProject.pages.forEach((page) => {
                 if (page.id) {
-                  // 如果页面已有描述，说明已完成
+                  // If page has description, it's completed
                   const hasDescription = !!page.description_content;
-                  // 如果状态是 GENERATING 或还没有描述，说明还在生成中
+                  // If status is GENERATING or no description, it's in progress
                   const isGenerating = page.status === 'GENERATING' || 
                                       (!hasDescription && initialTasks[page.id]);
                   if (isGenerating) {
@@ -567,64 +567,64 @@ const debouncedUpdatePage = debounce(
               set({ pageDescriptionGeneratingTasks: updatedTasks });
             }
             
-            // 检查任务是否完成
+            // Check if task completed
             if (task.status === 'COMPLETED') {
-              // 清除所有生成状态
+              // Clear all generation states
               set({ 
                 pageDescriptionGeneratingTasks: {},
                 taskProgress: null,
                 activeTaskId: null
               });
-              // 最后同步一次确保数据最新
+              // Final sync to ensure latest data
               await get().syncProject();
             } else if (task.status === 'FAILED') {
-              // 任务失败
+              // Task failed
               set({ 
                 pageDescriptionGeneratingTasks: {},
                 taskProgress: null,
                 activeTaskId: null,
-                error: normalizeErrorMessage(task.error_message || task.error || '生成描述失败')
+                error: normalizeErrorMessage(task.error_message || task.error || 'Failed to generate descriptions')
               });
             } else if (task.status === 'PENDING' || task.status === 'PROCESSING') {
-              // 继续轮询
+              // Continue polling
               setTimeout(pollAndSync, 2000);
             }
           }
         } catch (error: any) {
-          console.error('[生成描述] 轮询错误:', error);
-          // 即使轮询出错，也继续尝试同步项目数据
+          console.error('[Generate Descriptions] Polling error:', error);
+          // Even if polling error, continue to try sync project data
           await get().syncProject();
           setTimeout(pollAndSync, 2000);
         }
       };
       
-      // 开始轮询
+      // Start polling
       setTimeout(pollAndSync, 2000);
       
     } catch (error: any) {
-      console.error('[生成描述] 启动任务失败:', error);
+      console.error('[Generate Descriptions] Failed to start task:', error);
       set({ 
         pageDescriptionGeneratingTasks: {},
-        error: normalizeErrorMessage(error.message || '启动生成任务失败')
+        error: normalizeErrorMessage(error.message || 'Failed to start generation task')
       });
       throw error;
     }
   },
 
-  // 生成单页描述
+  // Generate single page description
   generatePageDescription: async (pageId: string) => {
     const { currentProject, pageDescriptionGeneratingTasks } = get();
     if (!currentProject) return;
 
-    // 如果该页面正在生成，不重复提交
+    // If page is generating, do not resubmit
     if (pageDescriptionGeneratingTasks[pageId]) {
-      console.log(`[生成描述] 页面 ${pageId} 正在生成中，跳过重复请求`);
+      console.log(`[Generate Descriptions] Page ${pageId} is generating, skipping duplicate request`);
       return;
     }
 
     set({ error: null });
     
-    // 标记为生成中
+    // Mark as generating
     set({
       pageDescriptionGeneratingTasks: {
         ...pageDescriptionGeneratingTasks,
@@ -633,19 +633,19 @@ const debouncedUpdatePage = debounce(
     });
 
     try {
-      // 立即同步一次项目数据，以更新页面状态
+      // Sync project data immediately to update page status
       await get().syncProject();
       
-      // 传递 force_regenerate=true 以允许重新生成已有描述
+      // Pass force_regenerate=true to allow regeneration of existing description
       await api.generatePageDescription(currentProject.id, pageId, true);
       
-      // 刷新项目数据
+      // Refresh project data
       await get().syncProject();
     } catch (error: any) {
-      set({ error: normalizeErrorMessage(error.message || '生成描述失败') });
+      set({ error: normalizeErrorMessage(error.message || 'Failed to generate description') });
       throw error;
     } finally {
-      // 清除生成状态
+      // Clear generation state
       const { pageDescriptionGeneratingTasks: currentTasks } = get();
       const newTasks = { ...currentTasks };
       delete newTasks[pageId];
@@ -653,22 +653,22 @@ const debouncedUpdatePage = debounce(
     }
   },
 
-  // 生成图片（非阻塞，每个页面显示生成状态）
+  // Generate images (non-blocking, status displayed per page)
   generateImages: async (pageIds?: string[]) => {
     const { currentProject, pageGeneratingTasks } = get();
     if (!currentProject) return;
 
-    // 确定要生成的页面ID列表
+    // Determine target page IDs
     const targetPageIds = pageIds || currentProject.pages.map(p => p.id).filter((id): id is string => !!id);
     
-    // 检查是否有页面正在生成
+    // Check if pages are generating
     const alreadyGenerating = targetPageIds.filter(id => pageGeneratingTasks[id]);
     if (alreadyGenerating.length > 0) {
-      console.log(`[批量生成] ${alreadyGenerating.length} 个页面正在生成中，跳过`);
-      // 过滤掉已经在生成的页面
+      console.log(`[Batch Generate] ${alreadyGenerating.length} pages are generating, skipping`);
+      // Filter out pages already generating
       const newPageIds = targetPageIds.filter(id => !pageGeneratingTasks[id]);
       if (newPageIds.length === 0) {
-        console.log('[批量生成] 所有页面都在生成中，跳过请求');
+        console.log('[Batch Generate] All pages are generating, skipping request');
         return;
       }
     }
@@ -676,41 +676,41 @@ const debouncedUpdatePage = debounce(
     set({ error: null });
     
     try {
-      // 调用批量生成 API
+      // Call batch generate API
       const response = await api.generateImages(currentProject.id, undefined, pageIds);
       const taskId = response.data?.task_id;
       
       if (taskId) {
-        console.log(`[批量生成] 收到 task_id: ${taskId}，标记 ${targetPageIds.length} 个页面为生成中`);
+        console.log(`[Batch Generate] Received task_id: ${taskId}, marking ${targetPageIds.length} pages as generating`);
         
-        // 为所有目标页面设置任务ID
+        // Set task ID for all target pages
         const newPageGeneratingTasks = { ...pageGeneratingTasks };
         targetPageIds.forEach(id => {
           newPageGeneratingTasks[id] = taskId;
         });
         set({ pageGeneratingTasks: newPageGeneratingTasks });
         
-        // 立即同步一次项目数据，以获取后端设置的 'GENERATING' 状态
+        // Sync project data immediately to get 'GENERATING' status from backend
         await get().syncProject();
         
-        // 开始轮询批量任务状态（非阻塞）
+        // Start polling batch task status (non-blocking)
         get().pollImageTask(taskId, targetPageIds);
       } else {
-        // 如果没有返回 task_id，可能是同步接口，直接刷新
+        // If no task_id returned, likely a synchronous interface, refresh directly
         await get().syncProject();
       }
     } catch (error: any) {
-      console.error('[批量生成] 启动失败:', error);
-      set({ error: normalizeErrorMessage(error.message || '批量生成图片失败') });
+      console.error('[Batch Generate] Failed to start:', error);
+      set({ error: normalizeErrorMessage(error.message || 'Failed to generate images') });
       throw error;
     }
   },
 
-  // 轮询图片生成任务（非阻塞，支持单页和批量）
+  // Poll image generation task (non-blocking, supports single and batch)
   pollImageTask: async (taskId: string, pageIds: string[]) => {
     const { currentProject } = get();
     if (!currentProject) {
-      console.warn('[批量轮询] 没有当前项目，停止轮询');
+      console.warn('[Batch Polling] No current project, stopping polling');
       return;
     }
 
@@ -720,16 +720,16 @@ const debouncedUpdatePage = debounce(
         const task = response.data;
         
         if (!task) {
-          console.warn('[批量轮询] 响应中没有任务数据');
+          console.warn('[Batch Polling] No task data in response');
           return;
         }
 
-        console.log(`[批量轮询] Task ${taskId} 状态: ${task.status}`, task.progress);
+        console.log(`[Batch Polling] Task ${taskId} status: ${task.status}`, task.progress);
 
-        // 检查任务状态
+        // Check task status
         if (task.status === 'COMPLETED') {
-          console.log(`[批量轮询] Task ${taskId} 已完成，清除任务记录`);
-          // 清除所有相关页面的任务记录
+          console.log(`[Batch Polling] Task ${taskId} completed, clearing task records`);
+          // Clear task records for all relevant pages
           const { pageGeneratingTasks } = get();
           const newTasks = { ...pageGeneratingTasks };
           pageIds.forEach(id => {
@@ -738,11 +738,11 @@ const debouncedUpdatePage = debounce(
             }
           });
           set({ pageGeneratingTasks: newTasks });
-          // 刷新项目数据
+          // Refresh project data
           await get().syncProject();
         } else if (task.status === 'FAILED') {
-          console.error(`[批量轮询] Task ${taskId} 失败:`, task.error_message || task.error);
-          // 清除所有相关页面的任务记录
+          console.error(`[Batch Polling] Task ${taskId} failed:`, task.error_message || task.error);
+          // Clear task records for all relevant pages
           const { pageGeneratingTasks } = get();
           const newTasks = { ...pageGeneratingTasks };
           pageIds.forEach(id => {
@@ -752,19 +752,19 @@ const debouncedUpdatePage = debounce(
           });
           set({ 
             pageGeneratingTasks: newTasks,
-            error: normalizeErrorMessage(task.error_message || task.error || '批量生成失败')
+            error: normalizeErrorMessage(task.error_message || task.error || 'Batch generation failed')
           });
-          // 刷新项目数据以更新页面状态
+          // Refresh project data to update page status
           await get().syncProject();
         } else if (task.status === 'PENDING' || task.status === 'PROCESSING') {
-          // 继续轮询，同时同步项目数据以更新页面状态
-          console.log(`[批量轮询] Task ${taskId} 处理中，同步项目数据...`);
+          // Continue polling, also sync project data to update page status
+          console.log(`[Batch Polling] Task ${taskId} processing, syncing project data...`);
           await get().syncProject();
-          console.log(`[批量轮询] Task ${taskId} 处理中，2秒后继续轮询...`);
+          console.log(`[Batch Polling] Task ${taskId} processing, continuing polling in 2s...`);
           setTimeout(poll, 2000);
         } else {
-          // 未知状态，停止轮询
-          console.warn(`[批量轮询] Task ${taskId} 未知状态: ${task.status}，停止轮询`);
+          // Unknown status, stop polling
+          console.warn(`[Batch Polling] Task ${taskId} unknown status: ${task.status}, stopping polling`);
           const { pageGeneratingTasks } = get();
           const newTasks = { ...pageGeneratingTasks };
           pageIds.forEach(id => {
@@ -775,8 +775,8 @@ const debouncedUpdatePage = debounce(
           set({ pageGeneratingTasks: newTasks });
         }
       } catch (error: any) {
-        console.error('[批量轮询] 轮询错误:', error);
-        // 清除所有相关页面的任务记录
+        console.error('[Batch Polling] Polling error:', error);
+        // Clear task records for all relevant pages
         const { pageGeneratingTasks } = get();
         const newTasks = { ...pageGeneratingTasks };
         pageIds.forEach(id => {
@@ -788,18 +788,18 @@ const debouncedUpdatePage = debounce(
       }
     };
 
-    // 开始轮询（不 await，立即返回让 UI 继续响应）
+    // Start polling (not await, return immediately to keep UI responsive)
     poll();
   },
 
-  // 编辑页面图片（异步）
+  // Edit page image (async)
   editPageImage: async (pageId, editPrompt, contextImages) => {
     const { currentProject, pageGeneratingTasks } = get();
     if (!currentProject) return;
 
-    // 如果该页面正在生成，不重复提交
+    // If page is generating, do not resubmit
     if (pageGeneratingTasks[pageId]) {
-      console.log(`[编辑] 页面 ${pageId} 正在生成中，跳过重复请求`);
+      console.log(`[Edit] Page ${pageId} is generating, skipping duplicate request`);
       return;
     }
 
@@ -809,31 +809,31 @@ const debouncedUpdatePage = debounce(
       const taskId = response.data?.task_id;
       
       if (taskId) {
-        // 记录该页面的任务ID
+        // Record task ID for this page
         set({ 
           pageGeneratingTasks: { ...pageGeneratingTasks, [pageId]: taskId }
         });
         
-        // 立即同步一次项目数据，以获取后端设置的'GENERATING'状态
+        // Sync project data immediately to get 'GENERATING' status from backend
         await get().syncProject();
         
-        // 开始轮询（使用统一的轮询函数）
+        // Start polling (using unified polling function)
         get().pollImageTask(taskId, [pageId]);
       } else {
-        // 如果没有返回task_id，可能是同步接口，直接刷新
+        // If no task_id returned, likely synchronous interface, refresh directly
         await get().syncProject();
       }
     } catch (error: any) {
-      // 清除该页面的任务记录
+      // Clear task record for this page
       const { pageGeneratingTasks } = get();
       const newTasks = { ...pageGeneratingTasks };
       delete newTasks[pageId];
-      set({ pageGeneratingTasks: newTasks, error: normalizeErrorMessage(error.message || '编辑图片失败') });
+      set({ pageGeneratingTasks: newTasks, error: normalizeErrorMessage(error.message || 'Image editing failed') });
       throw error;
     }
   },
 
-  // 导出PPTX
+  // Export PPTX
   exportPPTX: async (pageIds?: string[]) => {
     const { currentProject } = get();
     if (!currentProject) return;
@@ -841,24 +841,24 @@ const debouncedUpdatePage = debounce(
     set({ isGlobalLoading: true, error: null });
     try {
       const response = await api.exportPPTX(currentProject.id, pageIds);
-      // 优先使用相对路径，避免 Docker 环境下的端口问题
+      // Prefer relative path to avoid port issues in Docker environment
       const downloadUrl =
         response.data?.download_url || response.data?.download_url_absolute;
 
       if (!downloadUrl) {
-        throw new Error('导出链接获取失败');
+        throw new Error('Failed to get export link');
       }
 
-      // 使用浏览器直接下载链接，避免 axios 受带宽和超时影响
+      // Use browser to download link directly
       window.open(downloadUrl, '_blank');
     } catch (error: any) {
-      set({ error: error.message || '导出失败' });
+      set({ error: error.message || 'Export failed' });
     } finally {
       set({ isGlobalLoading: false });
     }
   },
 
-  // 导出PDF
+  // Export PDF
   exportPDF: async (pageIds?: string[]) => {
     const { currentProject } = get();
     if (!currentProject) return;
@@ -866,36 +866,36 @@ const debouncedUpdatePage = debounce(
     set({ isGlobalLoading: true, error: null });
     try {
       const response = await api.exportPDF(currentProject.id, pageIds);
-      // 优先使用相对路径，避免 Docker 环境下的端口问题
+      // Prefer relative path to avoid port issues in Docker environment
       const downloadUrl =
         response.data?.download_url || response.data?.download_url_absolute;
 
       if (!downloadUrl) {
-        throw new Error('导出链接获取失败');
+        throw new Error('Failed to get export link');
       }
 
-      // 使用浏览器直接下载链接，避免 axios 受带宽和超时影响
+      // Use browser to download link directly
       window.open(downloadUrl, '_blank');
     } catch (error: any) {
-      set({ error: error.message || '导出失败' });
+      set({ error: error.message || 'Export failed' });
     } finally {
       set({ isGlobalLoading: false });
     }
   },
 
-  // 导出可编辑PPTX（异步任务）
+  // Export editable PPTX (async task)
   exportEditablePPTX: async (filename?: string, pageIds?: string[]) => {
     const { currentProject, startAsyncTask } = get();
     if (!currentProject) return;
 
     try {
-      console.log('[导出可编辑PPTX] 启动异步导出任务...');
-      // startAsyncTask 中的 pollTask 会在任务完成时自动处理下载
+      console.log('[Export Editable PPTX] Starting async export task...');
+      // pollTask in startAsyncTask will handle download on task completion
       await startAsyncTask(() => api.exportEditablePPTX(currentProject.id, filename, pageIds));
-      console.log('[导出可编辑PPTX] 异步任务完成');
+      console.log('[Export Editable PPTX] Async task completed');
     } catch (error: any) {
-      console.error('[导出可编辑PPTX] 导出失败:', error);
-      set({ error: error.message || '导出可编辑PPTX失败' });
+      console.error('[Export Editable PPTX] Export failed:', error);
+      set({ error: error.message || 'Export editable PPTX failed' });
     }
   },
 };});

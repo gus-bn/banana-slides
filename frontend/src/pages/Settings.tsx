@@ -7,7 +7,7 @@ import type { OutputLanguage } from '@/api/endpoints';
 import { OUTPUT_LANGUAGE_OPTIONS } from '@/api/endpoints';
 import type { Settings as SettingsType } from '@/types';
 
-// 配置项类型定义
+// Configuration item type definition
 type FieldType = 'text' | 'password' | 'number' | 'select' | 'buttons';
 
 interface FieldConfig {
@@ -16,9 +16,9 @@ interface FieldConfig {
   type: FieldType;
   placeholder?: string;
   description?: string;
-  sensitiveField?: boolean;  // 是否为敏感字段（如 API Key）
-  lengthKey?: keyof SettingsType;  // 用于显示已有长度的 key（如 api_key_length）
-  options?: { value: string; label: string }[];  // select 类型的选项
+  sensitiveField?: boolean;  // Whether it is a sensitive field (like API Key)
+  lengthKey?: keyof SettingsType;  // Key used to display existing length (like api_key_length)
+  options?: { value: string; label: string }[];  // Options for select type
   min?: number;
   max?: number;
 }
@@ -29,7 +29,7 @@ interface SectionConfig {
   fields: FieldConfig[];
 }
 
-// 初始表单数据
+// Initial form data
 const initialFormData = {
   ai_provider_format: 'gemini' as 'openai' | 'gemini',
   api_base_url: '',
@@ -46,20 +46,20 @@ const initialFormData = {
   output_language: 'zh' as OutputLanguage,
 };
 
-// 配置驱动的表单区块定义
+// Configuration-driven form section definition
 const settingsSections: SectionConfig[] = [
   {
-    title: '大模型 API 配置',
+    title: 'LLM API Configuration',
     icon: <Key size={20} />,
     fields: [
       {
         key: 'ai_provider_format',
-        label: 'AI 提供商格式',
+        label: 'AI Provider Format',
         type: 'buttons',
-        description: '选择 API 请求格式，影响后端如何构造和发送请求。保存设置后生效。',
+        description: 'Select API request format, affecting how the backend constructs and sends requests. Effective after saving.',
         options: [
-          { value: 'openai', label: 'OpenAI 格式' },
-          { value: 'gemini', label: 'Gemini 格式' },
+          { value: 'openai', label: 'OpenAI Format' },
+          { value: 'gemini', label: 'Gemini Format' },
         ],
       },
       {
@@ -67,77 +67,77 @@ const settingsSections: SectionConfig[] = [
         label: 'API Base URL',
         type: 'text',
         placeholder: 'https://api.example.com',
-        description: '设置大模型提供商 API 的基础 URL',
+        description: 'Set the base URL for the LLM provider API',
       },
       {
         key: 'api_key',
         label: 'API Key',
         type: 'password',
-        placeholder: '输入新的 API Key',
+        placeholder: 'Enter new API Key',
         sensitiveField: true,
         lengthKey: 'api_key_length',
-        description: '留空则保持当前设置不变，输入新值则更新',
+        description: 'Leave blank to keep current settings, enter new value to update',
       },
     ],
   },
   {
-    title: '模型配置',
+    title: 'Model Configuration',
     icon: <FileText size={20} />,
     fields: [
       {
         key: 'text_model',
-        label: '文本大模型',
+        label: 'Text Model',
         type: 'text',
-        placeholder: '留空使用环境变量配置 (如: gemini-2.0-flash-exp)',
-        description: '用于生成大纲、描述等文本内容的模型名称',
+        placeholder: 'Leave blank to use environment variable (e.g., gemini-2.0-flash-exp)',
+        description: 'Model name used for generating outlines, descriptions, etc.',
       },
       {
         key: 'image_model',
-        label: '图像生成模型',
+        label: 'Image Generation Model',
         type: 'text',
-        placeholder: '留空使用环境变量配置 (如: imagen-3.0-generate-001)',
-        description: '用于生成页面图片的模型名称',
+        placeholder: 'Leave blank to use environment variable (e.g., imagen-3.0-generate-001)',
+        description: 'Model name used for generating page images',
       },
       {
         key: 'image_caption_model',
-        label: '图片识别模型',
+        label: 'Image Recognition Model',
         type: 'text',
-        placeholder: '留空使用环境变量配置 (如: gemini-2.0-flash-exp)',
-        description: '用于识别参考文件中的图片并生成描述',
+        placeholder: 'Leave blank to use environment variable (e.g., gemini-2.0-flash-exp)',
+        description: 'Used to recognize images in reference files and generate descriptions',
       },
     ],
   },
   {
-    title: 'MinerU 配置',
+    title: 'MinerU Configuration',
     icon: <FileText size={20} />,
     fields: [
       {
         key: 'mineru_api_base',
         label: 'MinerU API Base',
         type: 'text',
-        placeholder: '留空使用环境变量配置 (如: https://mineru.net)',
-        description: 'MinerU 服务地址，用于解析参考文件',
+        placeholder: 'Leave blank to use environment variable (e.g., https://mineru.net)',
+        description: 'MinerU service address, used for parsing reference files',
       },
       {
         key: 'mineru_token',
         label: 'MinerU Token',
         type: 'password',
-        placeholder: '输入新的 MinerU Token',
+        placeholder: 'Enter new MinerU Token',
         sensitiveField: true,
         lengthKey: 'mineru_token_length',
-        description: '留空则保持当前设置不变，输入新值则更新',
+        description: 'Leave blank to keep current settings, enter new value to update',
       },
     ],
   },
   {
-    title: '图像生成配置',
+    title: 'Image Generation Configuration',
     icon: <Image size={20} />,
     fields: [
       {
         key: 'image_resolution',
-        label: '图像清晰度（某些OpenAI格式中转调整该值无效）',
+        label: 'Image Resolution (May not be effective for some OpenAI format relays)',
         type: 'select',
-        description: '更高的清晰度会生成更详细的图像，但需要更长时间',
+        description: 'Higher resolution generates more detailed images but takes longer',
         options: [
           { value: '1K', label: '1K (1024px)' },
           { value: '2K', label: '2K (2048px)' },
@@ -147,43 +147,43 @@ const settingsSections: SectionConfig[] = [
     ],
   },
   {
-    title: '性能配置',
+    title: 'Performance Configuration',
     icon: <Zap size={20} />,
     fields: [
       {
         key: 'max_description_workers',
-        label: '描述生成最大并发数',
+        label: 'Max Description Workers',
         type: 'number',
         min: 1,
         max: 20,
-        description: '同时生成描述的最大工作线程数 (1-20)，越大速度越快',
+        description: 'Max concurrent worker threads for description generation (1-20), larger is faster',
       },
       {
         key: 'max_image_workers',
-        label: '图像生成最大并发数',
+        label: 'Max Image Workers',
         type: 'number',
         min: 1,
         max: 20,
-        description: '同时生成图像的最大工作线程数 (1-20)，越大速度越快',
+        description: 'Max concurrent worker threads for image generation (1-20), larger is faster',
       },
     ],
   },
   {
-    title: '输出语言设置',
+    title: 'Output Language Settings',
     icon: <Globe size={20} />,
     fields: [
       {
         key: 'output_language',
-        label: '默认输出语言',
+        label: 'Default Output Language',
         type: 'buttons',
-        description: 'AI 生成内容时使用的默认语言',
+        description: 'Default language used when AI generates content',
         options: OUTPUT_LANGUAGE_OPTIONS,
       },
     ],
   },
 ];
 
-// Settings 组件 - 纯嵌入模式（可复用）
+// Settings Component - Pure embedded mode (reusable)
 export const Settings: React.FC = () => {
   const { show, ToastContainer } = useToast();
   const { confirm, ConfirmDialog } = useConfirm();
@@ -220,9 +220,9 @@ export const Settings: React.FC = () => {
         });
       }
     } catch (error: any) {
-      console.error('加载设置失败:', error);
+      console.error('Failed to load settings:', error);
       show({
-        message: '加载设置失败: ' + (error?.message || '未知错误'),
+        message: 'Failed to load settings: ' + (error?.message || 'Unknown error'),
         type: 'error'
       });
     } finally {
@@ -249,13 +249,13 @@ export const Settings: React.FC = () => {
       const response = await api.updateSettings(payload);
       if (response.data) {
         setSettings(response.data);
-        show({ message: '设置保存成功', type: 'success' });
+        show({ message: 'Settings saved successfully', type: 'success' });
         setFormData(prev => ({ ...prev, api_key: '', mineru_token: '' }));
       }
     } catch (error: any) {
-      console.error('保存设置失败:', error);
+      console.error('Failed to save settings:', error);
       show({
-        message: '保存设置失败: ' + (error?.response?.data?.error?.message || error?.message || '未知错误'),
+        message: 'Failed to save settings: ' + (error?.response?.data?.error?.message || error?.message || 'Unknown error'),
         type: 'error'
       });
     } finally {
@@ -265,7 +265,7 @@ export const Settings: React.FC = () => {
 
   const handleReset = () => {
     confirm(
-      '将把大模型、图像生成和并发等所有配置恢复为环境默认值，已保存的自定义设置将丢失，确定继续吗？',
+      'All configurations such as large models, image generation, and concurrency will be restored to environment defaults. Saved custom settings will be lost. Continue?',
       async () => {
         setIsSaving(true);
         try {
@@ -287,12 +287,12 @@ export const Settings: React.FC = () => {
               image_caption_model: response.data.image_caption_model || '',
               output_language: response.data.output_language || 'zh',
             });
-            show({ message: '设置已重置', type: 'success' });
+            show({ message: 'Settings reset', type: 'success' });
           }
         } catch (error: any) {
-          console.error('重置设置失败:', error);
+          console.error('Failed to reset settings:', error);
           show({
-            message: '重置设置失败: ' + (error?.message || '未知错误'),
+            message: 'Failed to reset settings: ' + (error?.message || 'Unknown error'),
             type: 'error'
           });
         } finally {
@@ -300,9 +300,9 @@ export const Settings: React.FC = () => {
         }
       },
       {
-        title: '确认重置为默认配置',
-        confirmText: '确定重置',
-        cancelText: '取消',
+        title: 'Confirm Reset to Default',
+        confirmText: 'Reset',
+        cancelText: 'Cancel',
         variant: 'warning',
       }
     );
@@ -370,9 +370,9 @@ export const Settings: React.FC = () => {
       );
     }
 
-    // text, password, number 类型
+    // text, password, number types
     const placeholder = field.sensitiveField && settings && field.lengthKey
-      ? `已设置（长度: ${settings[field.lengthKey]}）`
+      ? `Set (Length: ${settings[field.lengthKey]})`
       : field.placeholder || '';
 
     return (
@@ -401,7 +401,7 @@ export const Settings: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loading message="加载设置中..." />
+        <Loading message="Loading settings..." />
       </div>
     );
   }
@@ -411,7 +411,7 @@ export const Settings: React.FC = () => {
       <ToastContainer />
       {ConfirmDialog}
       <div className="space-y-8">
-        {/* 配置区块（配置驱动） */}
+        {/* Configuration Sections (Config Driven) */}
         <div className="space-y-8">
           {settingsSections.map((section) => (
             <div key={section.title}>
@@ -421,10 +421,10 @@ export const Settings: React.FC = () => {
               </h2>
               <div className="space-y-4">
                 {section.fields.map((field) => renderField(field))}
-                {section.title === '大模型 API 配置' && (
+                {section.title === 'LLM API Configuration' && (
                   <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                     <p className="text-sm text-gray-700">
-                      API 密匙获取可前往{' '}
+                      Get API Key at{' '}
                       <a
                         href="https://aihubmix.com/?aff=17EC"
                         target="_blank"
@@ -433,7 +433,7 @@ export const Settings: React.FC = () => {
                       >
                         AIHubmix
                       </a>
-                      , 减小迁移成本
+                      , reduce migration costs
                     </p>
                   </div>
                 )}
@@ -442,7 +442,7 @@ export const Settings: React.FC = () => {
           ))}
         </div>
 
-        {/* 操作按钮 */}
+        {/* Action Buttons */}
         <div className="flex items-center justify-between pt-4 border-t border-gray-200">
           <Button
             variant="secondary"
@@ -450,7 +450,7 @@ export const Settings: React.FC = () => {
             onClick={handleReset}
             disabled={isSaving}
           >
-            重置为默认配置
+            Reset to Default
           </Button>
           <Button
             variant="primary"
@@ -458,7 +458,7 @@ export const Settings: React.FC = () => {
             onClick={handleSave}
             loading={isSaving}
           >
-            {isSaving ? '保存中...' : '保存设置'}
+            {isSaving ? 'Saving...' : 'Save Settings'}
           </Button>
         </div>
       </div>
@@ -466,7 +466,7 @@ export const Settings: React.FC = () => {
   );
 };
 
-// SettingsPage 组件 - 完整页面包装
+// SettingsPage Component - Full Page Wrapper
 export const SettingsPage: React.FC = () => {
   const navigate = useNavigate();
   
@@ -475,7 +475,7 @@ export const SettingsPage: React.FC = () => {
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <Card className="p-6 md:p-8">
           <div className="space-y-8">
-            {/* 顶部标题 */}
+            {/* Top Title */}
             <div className="flex items-center justify-between pb-6 border-b border-gray-200">
               <div className="flex items-center">
                 <Button
@@ -484,12 +484,12 @@ export const SettingsPage: React.FC = () => {
                   onClick={() => navigate('/')}
                   className="mr-4"
                 >
-                  返回首页
+                  Home
                 </Button>
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900">系统设置</h1>
+                  <h1 className="text-2xl font-bold text-gray-900">System Settings</h1>
                   <p className="text-sm text-gray-500 mt-1">
-                    配置应用的各项参数
+                    Configure application parameters
                   </p>
                 </div>
               </div>

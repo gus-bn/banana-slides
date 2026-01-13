@@ -11,22 +11,22 @@ import {
 } from '@/api/endpoints';
 
 interface ReferenceFileSelectorProps {
-  projectId?: string | null; // 可选，如果不提供则使用全局文件
+  projectId?: string | null; // Optional, use global files if not provided
   isOpen: boolean;
   onClose: () => void;
   onSelect: (files: ReferenceFile[]) => void;
-  multiple?: boolean; // 是否支持多选
-  maxSelection?: number; // 最大选择数量
-  initialSelectedIds?: string[]; // 初始已选择的文件ID列表
+  multiple?: boolean; // Whether to support multiple selection
+  maxSelection?: number; // Maximum number of selections
+  initialSelectedIds?: string[]; // Initial list of selected file IDs
 }
 
 /**
- * 参考文件选择器组件
- * - 浏览项目下的所有参考文件
- * - 支持单选/多选
- * - 支持上传本地文件
- * - 支持从文件库选择（已解析的直接用，未解析的选中后当场解析）
- * - 支持删除文件
+ * Reference File Selector Component
+ * - Browse all reference files under the project
+ * - Support single/multiple selection
+ * - Support uploading local files
+ * - Support selecting from file library (parsed ones are used directly, unparsed ones are parsed on selection)
+ * - Support deleting files
  */
 export const ReferenceFileSelector: React.FC<ReferenceFileSelectorProps> = React.memo(({
   projectId,
@@ -44,12 +44,12 @@ export const ReferenceFileSelector: React.FC<ReferenceFileSelectorProps> = React
   const [isLoading, setIsLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [parsingIds, setParsingIds] = useState<Set<string>>(new Set());
-  const [filterProjectId, setFilterProjectId] = useState<string>('all'); // 始终默认显示所有附件
+  const [filterProjectId, setFilterProjectId] = useState<string>('all'); // Default to show all attachments
   const fileInputRef = useRef<HTMLInputElement>(null);
   const initialSelectedIdsRef = useRef(initialSelectedIds);
   const showRef = useRef(show);
 
-  // 更新 ref 以保持最新的值，避免将其加入依赖数组导致无限循环
+  // Update ref to keep latest value, avoid adding to dependency array causing infinite loop
   useEffect(() => {
     initialSelectedIdsRef.current = initialSelectedIds;
     showRef.current = show;
@@ -58,25 +58,25 @@ export const ReferenceFileSelector: React.FC<ReferenceFileSelectorProps> = React
   const loadFiles = useCallback(async () => {
     setIsLoading(true);
     try {
-      // 根据 filterProjectId 决定查询哪些文件
-      // 'all' - 所有文件（全局 + 项目）
-      // 'none' - 只查询未归类文件（全局文件，project_id=None）
-      // 项目ID - 只查询该项目的文件
+      // Determine which files to query based on filterProjectId
+      // 'all' - All files (global + project)
+      // 'none' - Only query unclassified files (global files, project_id=None)
+      // Project ID - Only query files of that project
       const targetProjectId = filterProjectId === 'all' ? 'all' : filterProjectId === 'none' ? 'none' : filterProjectId;
       const response = await listProjectReferenceFiles(targetProjectId);
       
       if (response.data?.files) {
-        // 合并新旧文件列表，避免丢失正在解析的文件
+        // Merge new and old file lists to avoid losing parsing files
         setFiles(prev => {
           const fileMap = new Map<string, ReferenceFile>();
-          const serverFiles = response.data!.files; // 已经检查过 response.data?.files
+          const serverFiles = response.data!.files; // Already checked response.data?.files
           
-          // 先添加服务器返回的文件（这些是权威数据）
+          // First add files returned by server (these are authoritative data)
           serverFiles.forEach((f: ReferenceFile) => {
             fileMap.set(f.id, f);
           });
           
-          // 然后添加正在解析的文件（可能服务器还没更新状态）
+          // Then add parsing files (server status might not be updated yet)
           prev.forEach(f => {
             if (parsingIds.has(f.id) && !fileMap.has(f.id)) {
               fileMap.set(f.id, f);
@@ -87,9 +87,9 @@ export const ReferenceFileSelector: React.FC<ReferenceFileSelectorProps> = React
         });
       }
     } catch (error: any) {
-      console.error('加载参考文件列表失败:', error);
+      console.error('Failed to load reference file list:', error);
       showRef.current({
-        message: error?.response?.data?.error?.message || error.message || '加载参考文件列表失败',
+        message: error?.response?.data?.error?.message || error.message || 'Failed to load reference file list',
         type: 'error',
       });
     } finally {
@@ -100,12 +100,12 @@ export const ReferenceFileSelector: React.FC<ReferenceFileSelectorProps> = React
   useEffect(() => {
     if (isOpen) {
       loadFiles();
-      // 恢复初始选择
+      // Restore initial selection
       setSelectedFiles(new Set(initialSelectedIdsRef.current));
     }
   }, [isOpen, filterProjectId, loadFiles]);
 
-  // 轮询解析状态
+  // Poll parsing status
   useEffect(() => {
     if (!isOpen || parsingIds.size === 0) return;
 
@@ -121,7 +121,7 @@ export const ReferenceFileSelector: React.FC<ReferenceFileSelectorProps> = React
             const updatedFile = response.data.file;
             updatedFiles.push(updatedFile);
             
-            // 如果解析完成或失败，标记为完成
+            // If parsing completed or failed, mark as completed
             if (updatedFile.parse_status === 'completed' || updatedFile.parse_status === 'failed') {
               completedIds.push(fileId);
             }
@@ -131,7 +131,7 @@ export const ReferenceFileSelector: React.FC<ReferenceFileSelectorProps> = React
         }
       }
 
-      // 批量更新文件列表
+      // Batch update file list
       if (updatedFiles.length > 0) {
         setFiles(prev => {
           const fileMap = new Map(prev.map(f => [f.id, f]));
@@ -140,7 +140,7 @@ export const ReferenceFileSelector: React.FC<ReferenceFileSelectorProps> = React
         });
       }
 
-      // 从轮询列表中移除已完成的文件
+      // Remove completed files from polling list
       if (completedIds.length > 0) {
         setParsingIds(prev => {
           const newSet = new Set(prev);
@@ -148,15 +148,15 @@ export const ReferenceFileSelector: React.FC<ReferenceFileSelectorProps> = React
           return newSet;
         });
       }
-    }, 2000); // 每2秒轮询一次
+    }, 2000); // Poll every 2 seconds
 
     return () => clearInterval(intervalId);
   }, [isOpen, parsingIds]);
 
   const handleSelectFile = (file: ReferenceFile) => {
-    // 允许选择所有状态的文件（包括 pending 和 parsing）
-    // pending 的文件会在确定时触发解析
-    // parsing 的文件会等待解析完成
+    // Allow selecting files in all states (including pending and parsing)
+    // Pending files will trigger parsing on confirm
+    // Parsing files will wait for parsing completion
 
     if (multiple) {
       const newSelected = new Set(selectedFiles);
@@ -165,7 +165,7 @@ export const ReferenceFileSelector: React.FC<ReferenceFileSelectorProps> = React
       } else {
         if (maxSelection && newSelected.size >= maxSelection) {
           show({
-            message: `最多只能选择 ${maxSelection} 个文件`,
+            message: `Can only select up to ${maxSelection} files`,
             type: 'info',
           });
           return;
@@ -182,47 +182,47 @@ export const ReferenceFileSelector: React.FC<ReferenceFileSelectorProps> = React
     const selected = files.filter((f) => selectedFiles.has(f.id));
     
     if (selected.length === 0) {
-      show({ message: '请至少选择一个文件', type: 'info' });
+      show({ message: 'Please select at least one file', type: 'info' });
       return;
     }
     
-    // 检查是否有未解析的文件需要触发解析
+    // Check if there are unparsed files that need parsing
     const unparsedFiles = selected.filter(f => f.parse_status === 'pending');
     
     if (unparsedFiles.length > 0) {
-      // 触发解析未解析的文件，但立即返回（不等待）
+      // Trigger parsing for unparsed files, but return immediately (do not wait)
       try {
         show({
-          message: `已触发 ${unparsedFiles.length} 个文件的解析，将在后台进行`,
+          message: `Triggered parsing for ${unparsedFiles.length} files, will proceed in background`,
           type: 'success',
         });
 
-        // 触发所有未解析文件的解析（不等待完成）
+        // Trigger parsing for all unparsed files (do not wait for completion)
         unparsedFiles.forEach(file => {
           triggerFileParse(file.id).catch(error => {
-            console.error(`触发文件 ${file.filename} 解析失败:`, error);
+            console.error(`Failed to trigger parsing for file ${file.filename}:`, error);
           });
         });
         
-        // 立即返回所有选中的文件（包括 pending 状态的）
+        // Return all selected files immediately (including pending state)
         onSelect(selected);
         onClose();
       } catch (error: any) {
-        console.error('触发文件解析失败:', error);
+        console.error('Failed to trigger file parsing:', error);
         show({
-          message: error?.response?.data?.error?.message || error.message || '触发文件解析失败',
+          message: error?.response?.data?.error?.message || error.message || 'Failed to trigger file parsing',
           type: 'error',
         });
       }
     } else {
-      // 所有文件都已解析或正在解析，直接确认
-      // 允许选择所有状态的文件（completed, parsing）
+      // All files are parsed or parsing, confirm directly
+      // Allow selecting files in all states (completed, parsing)
       const validFiles = selected.filter(f => 
         f.parse_status === 'completed' || f.parse_status === 'parsing'
       );
       
       if (validFiles.length === 0) {
-        show({ message: '请选择有效的文件', type: 'info' });
+        show({ message: 'Please select valid files', type: 'info' });
         return;
       }
       
@@ -239,25 +239,25 @@ export const ReferenceFileSelector: React.FC<ReferenceFileSelectorProps> = React
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    // 检查是否有PPT文件，提示建议使用PDF
+    // Check for PPT files, suggest PDF
     const hasPptFiles = Array.from(files).some(file => {
       const fileExt = file.name.split('.').pop()?.toLowerCase();
       return fileExt === 'ppt' || fileExt === 'pptx';
     });
     
-    if (hasPptFiles) show({  message: '💡 提示：建议将PPT转换为PDF格式上传，可获得更好的解析效果', type: 'info' });
+    if (hasPptFiles) show({  message: '💡 Tip: Converting PPT to PDF format for upload is recommended for better parsing results', type: 'info' });
     
 
     setIsUploading(true);
     try {
-      // 根据当前筛选条件决定上传文件的归属
-      // 如果筛选为 'all' 或 'none'，上传为全局文件（不关联项目）
-      // 如果筛选为项目ID，上传到该项目
+      // Decide upload ownership based on current filter
+      // If filter is 'all' or 'none', upload as global file (not associated with project)
+      // If filter is project ID, upload to that project
       const targetProjectId = (filterProjectId === 'all' || filterProjectId === 'none')
         ? null
         : filterProjectId;
       
-      // 上传所有选中的文件
+      // Upload all selected files
       const uploadPromises = Array.from(files).map(file =>
         uploadReferenceFile(file, targetProjectId)
       );
@@ -268,9 +268,9 @@ export const ReferenceFileSelector: React.FC<ReferenceFileSelectorProps> = React
         .filter((f): f is ReferenceFile => f !== undefined);
 
       if (uploadedFiles.length > 0) {
-        show({ message: `成功上传 ${uploadedFiles.length} 个文件`, type: 'success' });
+        show({ message: `Successfully uploaded ${uploadedFiles.length} files`, type: 'success' });
         
-        // 只有正在解析的文件才添加到轮询列表（pending 状态的文件不轮询）
+        // Only add parsing files to polling list (pending files are not polled)
         const needsParsing = uploadedFiles.filter(f => 
           f.parse_status === 'parsing'
         );
@@ -282,27 +282,27 @@ export const ReferenceFileSelector: React.FC<ReferenceFileSelectorProps> = React
           });
         }
         
-        // 合并新上传的文件到现有列表，而不是完全替换
+        // Merge newly uploaded files into existing list instead of full replacement
         setFiles(prev => {
           const fileMap = new Map(prev.map(f => [f.id, f]));
           uploadedFiles.forEach(uf => fileMap.set(uf.id, uf));
           return Array.from(fileMap.values());
         });
         
-        // 延迟重新加载文件列表，确保服务器端数据已更新
+        // Delay reloading file list to ensure server data updated
         setTimeout(() => {
           loadFiles();
         }, 500);
       }
     } catch (error: any) {
-      console.error('上传文件失败:', error);
+      console.error('File upload failed:', error);
       show({
-        message: error?.response?.data?.error?.message || error.message || '上传文件失败',
+        message: error?.response?.data?.error?.message || error.message || 'File upload failed',
         type: 'error',
       });
     } finally {
       setIsUploading(false);
-      // 清空 input 值，以便可以重复选择同一文件
+      // Clear input value to allow re-selecting same file
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -317,7 +317,7 @@ export const ReferenceFileSelector: React.FC<ReferenceFileSelectorProps> = React
     const fileId = file.id;
 
     if (!fileId) {
-      show({ message: '无法删除：缺少文件ID', type: 'error' });
+      show({ message: 'Cannot delete: Missing file ID', type: 'error' });
       return;
     }
 
@@ -329,27 +329,27 @@ export const ReferenceFileSelector: React.FC<ReferenceFileSelectorProps> = React
 
     try {
       await deleteReferenceFile(fileId);
-      show({ message: '文件删除成功', type: 'success' });
+      show({ message: 'File deleted successfully', type: 'success' });
       
-      // 从选择中移除
+      // Remove from selection
       setSelectedFiles((prev) => {
         const newSet = new Set(prev);
         newSet.delete(fileId);
         return newSet;
       });
       
-      // 从轮询列表中移除
+      // Remove from polling list
       setParsingIds((prev) => {
         const newSet = new Set(prev);
         newSet.delete(fileId);
         return newSet;
       });
       
-      loadFiles(); // 重新加载文件列表
+      loadFiles(); // Reload file list
     } catch (error: any) {
-      console.error('删除文件失败:', error);
+      console.error('Failed to delete file:', error);
       show({
-        message: error?.response?.data?.error?.message || error.message || '删除文件失败',
+        message: error?.response?.data?.error?.message || error.message || 'Failed to delete file',
         type: 'error',
       });
     } finally {
@@ -383,30 +383,30 @@ export const ReferenceFileSelector: React.FC<ReferenceFileSelectorProps> = React
 
   const getStatusText = (file: ReferenceFile) => {
     if (parsingIds.has(file.id) || file.parse_status === 'parsing') {
-      return '解析中...';
+      return 'Parsing...';
     }
     switch (file.parse_status) {
       case 'pending':
-        return '等待解析';
+        return 'Pending';
       case 'completed':
-        return '解析完成';
+        return 'Completed';
       case 'failed':
-        return '解析失败';
+        return 'Failed';
       default:
         return '';
     }
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="选择参考文件" size="lg">
+    <Modal isOpen={isOpen} onClose={onClose} title="Select Reference File" size="lg">
       <div className="space-y-4">
-        {/* 工具栏 */}
+        {/* Toolbar */}
         <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2 text-sm text-gray-600">
-            <span>{files.length > 0 ? `共 ${files.length} 个文件` : '暂无文件'}</span>
+            <span>{files.length > 0 ? `Total ${files.length} files` : 'No files'}</span>
             {selectedFiles.size > 0 && (
               <span className="ml-2 text-banana-600">
-                已选择 {selectedFiles.size} 个
+                {selectedFiles.size} selected
               </span>
             )}
             {isLoading && files.length > 0 && (
@@ -414,16 +414,16 @@ export const ReferenceFileSelector: React.FC<ReferenceFileSelectorProps> = React
             )}
           </div>
           <div className="flex items-center gap-2 flex-wrap">
-            {/* 项目筛选下拉菜单 */}
+            {/* Project Filter Dropdown */}
             <select
               value={filterProjectId}
               onChange={(e) => setFilterProjectId(e.target.value)}
               className="px-3 py-1.5 text-sm border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-banana-500"
             >
-              <option value="all">所有附件</option>
-              <option value="none">未归类附件</option>
+              <option value="all">All Attachments</option>
+              <option value="none">Unclassified</option>
               {projectId && projectId !== 'global' && projectId !== 'none' && (
-                <option value={projectId}>当前项目附件</option>
+                <option value={projectId}>Current Project</option>
               )}
             </select>
             
@@ -434,7 +434,7 @@ export const ReferenceFileSelector: React.FC<ReferenceFileSelectorProps> = React
               onClick={loadFiles}
               disabled={isLoading}
             >
-              刷新
+              Refresh
             </Button>
             
             <Button
@@ -444,18 +444,18 @@ export const ReferenceFileSelector: React.FC<ReferenceFileSelectorProps> = React
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploading}
             >
-              {isUploading ? '上传中...' : '上传文件'}
+              {isUploading ? 'Uploading...' : 'Upload File'}
             </Button>
             
             {selectedFiles.size > 0 && (
               <Button variant="ghost" size="sm" onClick={handleClear}>
-                清空选择
+                Clear Selection
               </Button>
             )}
           </div>
         </div>
 
-        {/* 隐藏的文件输入 */}
+        {/* Hidden File Input */}
         <input
           ref={fileInputRef}
           type="file"
@@ -465,18 +465,18 @@ export const ReferenceFileSelector: React.FC<ReferenceFileSelectorProps> = React
           className="hidden"
         />
 
-        {/* 文件列表 */}
+        {/* File List */}
         <div className="border border-gray-200 rounded-lg max-h-96 overflow-y-auto">
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
-              <span className="ml-2 text-gray-500">加载中...</span>
+              <span className="ml-2 text-gray-500">Loading...</span>
             </div>
           ) : files.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-gray-400">
               <FileText className="w-12 h-12 mb-2" />
-              <p>暂无参考文件</p>
-              <p className="text-sm mt-1">点击"上传文件"按钮添加文件</p>
+              <p>No reference files</p>
+              <p className="text-sm mt-1">Click "Upload File" to add files</p>
             </div>
           ) : (
             <div className="divide-y divide-gray-200">
@@ -496,7 +496,7 @@ export const ReferenceFileSelector: React.FC<ReferenceFileSelectorProps> = React
                     `}
                   >
                     <div className="flex items-start gap-3">
-                      {/* 选择框 */}
+                      {/* Checkbox */}
                       <div className="flex-shrink-0 mt-1">
                         <div
                           className={`
@@ -514,14 +514,14 @@ export const ReferenceFileSelector: React.FC<ReferenceFileSelectorProps> = React
                         </div>
                       </div>
 
-                      {/* 文件图标 */}
+                      {/* File Icon */}
                       <div className="flex-shrink-0">
                         <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
                           <FileText className="w-5 h-5 text-blue-600" />
                         </div>
                       </div>
 
-                      {/* 文件信息 */}
+                      {/* File Info */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <p className="text-sm font-medium text-gray-900 truncate">
@@ -532,40 +532,40 @@ export const ReferenceFileSelector: React.FC<ReferenceFileSelectorProps> = React
                           </span>
                         </div>
 
-                        {/* 状态 */}
+                        {/* Status */}
                         <div className="flex items-center gap-1.5 mt-1">
                           {getStatusIcon(file)}
                           <p className="text-xs text-gray-600">
                             {getStatusText(file)}
                             {isPending && (
-                              <span className="ml-1 text-orange-500">(确定后解析)</span>
+                              <span className="ml-1 text-orange-500">(Parse on Confirm)</span>
                             )}
                           </p>
                         </div>
 
-                        {/* 失败信息 */}
+                        {/* Error Message */}
                         {file.parse_status === 'failed' && file.error_message && (
                           <p className="text-xs text-red-500 mt-1 line-clamp-1">
                             {file.error_message}
                           </p>
                         )}
 
-                        {/* 图片识别失败警告 */}
+                        {/* Image Caption Failure Warning */}
                         {file.parse_status === 'completed' && 
                          typeof file.image_caption_failed_count === 'number' && 
                          file.image_caption_failed_count > 0 && (
                           <p className="text-xs text-orange-500 mt-1">
-                            ⚠️ {file.image_caption_failed_count} 张图片未能生成描述
+                            ⚠️ {file.image_caption_failed_count} images failed to generate captions
                           </p>
                         )}
                       </div>
 
-                      {/* 删除按钮 */}
+                      {/* Delete Button */}
                       <button
                         onClick={(e) => handleDeleteFile(e, file)}
                         disabled={isDeleting}
                         className="flex-shrink-0 p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-50"
-                        title="删除文件"
+                        title="Delete File"
                       >
                         {isDeleting ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
@@ -581,20 +581,20 @@ export const ReferenceFileSelector: React.FC<ReferenceFileSelectorProps> = React
           )}
         </div>
 
-        {/* 底部操作栏 */}
+        {/* Bottom Action Bar */}
         <div className="flex items-center justify-between pt-4 border-t border-gray-200">
           <p className="text-xs text-gray-500">
-            💡 提示：选择未解析的文件将自动开始解析
+            💡 Tip: Selecting unparsed files will automatically trigger parsing
           </p>
           <div className="flex items-center gap-2">
             <Button variant="ghost" onClick={onClose}>
-              取消
+              Cancel
             </Button>
             <Button
               onClick={handleConfirm}
               disabled={selectedFiles.size === 0}
             >
-              确定 ({selectedFiles.size})
+              Confirm ({selectedFiles.size})
             </Button>
           </div>
         </div>

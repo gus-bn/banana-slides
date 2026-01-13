@@ -7,7 +7,7 @@ import type { ExportExtractorMethod, ExportInpaintMethod } from '@/types';
 interface ProjectSettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  // 项目设置
+  // Project settings
   extraRequirements: string;
   templateStyle: string;
   onExtraRequirementsChange: (value: string) => void;
@@ -16,7 +16,7 @@ interface ProjectSettingsModalProps {
   onSaveTemplateStyle: () => void;
   isSavingRequirements: boolean;
   isSavingTemplateStyle: boolean;
-  // 导出设置
+  // Export settings
   exportExtractorMethod?: ExportExtractorMethod;
   exportInpaintMethod?: ExportInpaintMethod;
   onExportExtractorMethodChange?: (value: ExportExtractorMethod) => void;
@@ -27,38 +27,38 @@ interface ProjectSettingsModalProps {
 
 type SettingsTab = 'project' | 'global' | 'export';
 
-// 组件提取方法选项
+// Component extractor method options
 const EXTRACTOR_METHOD_OPTIONS: { value: ExportExtractorMethod; label: string; description: string }[] = [
   { 
     value: 'hybrid', 
-    label: '混合提取（推荐）', 
-    description: 'MinerU版面分析 + 百度高精度OCR，文字识别更精确' 
+    label: 'Hybrid Extraction (Recommended)', 
+    description: 'MinerU layout analysis + Baidu high-precision OCR, more accurate text recognition' 
   },
   { 
     value: 'mineru', 
-    label: 'MinerU提取', 
-    description: '仅使用MinerU进行版面分析和文字识别' 
+    label: 'MinerU Extraction', 
+    description: 'Only use MinerU for layout analysis and text recognition' 
   },
 ];
 
-// 背景图获取方法选项
+// Background image acquisition method options
 const INPAINT_METHOD_OPTIONS: { value: ExportInpaintMethod; label: string; description: string; usesAI: boolean }[] = [
   { 
     value: 'hybrid', 
-    label: '混合方式获取（推荐）', 
-    description: '百度精确去除文字 + 生成式模型提升画质',
+    label: 'Hybrid Mode (Recommended)', 
+    description: 'Baidu precise text removal + Generative model image enhancement',
     usesAI: true 
   },
   { 
     value: 'generative', 
-    label: '生成式获取', 
-    description: '使用生成式大模型（如Gemini）直接生成背景，背景质量高但有遗留元素的可能',
+    label: 'Generative Mode', 
+    description: 'Use generative LLM (e.g., Gemini) to directly generate background, high quality but risk of residual elements',
     usesAI: true 
   },
   { 
     value: 'baidu', 
-    label: '百度抹除服务获取', 
-    description: '使用百度图像修复API，速度快但画质一般',
+    label: 'Baidu Erasure Service', 
+    description: 'Use Baidu Image Inpainting API, fast but average quality',
     usesAI: false 
   },
 ];
@@ -74,7 +74,7 @@ export const ProjectSettingsModal: React.FC<ProjectSettingsModalProps> = ({
   onSaveTemplateStyle,
   isSavingRequirements,
   isSavingTemplateStyle,
-  // 导出设置
+  // Export settings
   exportExtractorMethod = 'hybrid',
   exportInpaintMethod = 'hybrid',
   onExportExtractorMethodChange,
@@ -89,21 +89,21 @@ export const ProjectSettingsModal: React.FC<ProjectSettingsModalProps> = ({
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl h-[90vh] flex flex-col overflow-hidden">
-        {/* 顶部标题栏 */}
+        {/* Top Title Bar */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 flex-shrink-0">
-          <h2 className="text-xl font-bold text-gray-900">设置</h2>
+          <h2 className="text-xl font-bold text-gray-900">Settings</h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            aria-label="关闭"
+            aria-label="Close"
           >
             <X size={20} />
           </button>
         </div>
 
-        {/* 主内容区 */}
+        {/* Main Content Area */}
         <div className="flex-1 flex overflow-hidden min-h-0">
-          {/* 左侧导航栏 */}
+          {/* Left Sidebar */}
           <aside className="w-64 bg-gray-50 border-r border-gray-200 flex-shrink-0">
             <nav className="p-4 space-y-2">
               <button
@@ -115,7 +115,7 @@ export const ProjectSettingsModal: React.FC<ProjectSettingsModalProps> = ({
                 }`}
               >
                 <FileText size={20} />
-                <span className="font-medium">项目设置</span>
+                <span className="font-medium">Project Settings</span>
               </button>
               <button
                 onClick={() => setActiveTab('export')}
@@ -126,7 +126,7 @@ export const ProjectSettingsModal: React.FC<ProjectSettingsModalProps> = ({
                 }`}
               >
                 <Download size={20} />
-                <span className="font-medium">导出设置</span>
+                <span className="font-medium">Export Settings</span>
               </button>
               <button
                 onClick={() => setActiveTab('global')}
@@ -137,34 +137,34 @@ export const ProjectSettingsModal: React.FC<ProjectSettingsModalProps> = ({
                 }`}
               >
                 <SettingsIcon size={20} />
-                <span className="font-medium">全局设置</span>
+                <span className="font-medium">Global Settings</span>
               </button>
             </nav>
           </aside>
 
-          {/* 右侧内容区 */}
+          {/* Right Content Area */}
           <div className="flex-1 overflow-y-auto p-6">
             {activeTab === 'project' ? (
               <div className="max-w-3xl space-y-6">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">项目级配置</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Project Configuration</h3>
                   <p className="text-sm text-gray-600 mb-6">
-                    这些设置仅应用于当前项目，不影响其他项目
+                    These settings only apply to the current project and do not affect others.
                   </p>
                 </div>
 
-                {/* 额外要求 */}
+                {/* Extra Requirements */}
                 <div className="bg-gray-50 rounded-lg p-6 space-y-4">
                   <div>
-                    <h4 className="text-base font-semibold text-gray-900 mb-2">额外要求</h4>
+                    <h4 className="text-base font-semibold text-gray-900 mb-2">Extra Requirements</h4>
                     <p className="text-sm text-gray-600">
-                      在生成每个页面时，AI 会参考这些额外要求
+                      AI will refer to these extra requirements when generating each page.
                     </p>
                   </div>
                   <Textarea
                     value={extraRequirements}
                     onChange={(e) => onExtraRequirementsChange(e.target.value)}
-                    placeholder="例如：使用紧凑的布局，顶部展示一级大纲标题，加入更丰富的PPT插图..."
+                    placeholder="E.g., Use compact layout, show level 1 outline title at top, include richer PPT illustrations..."
                     rows={4}
                     className="text-sm"
                   />
@@ -175,22 +175,22 @@ export const ProjectSettingsModal: React.FC<ProjectSettingsModalProps> = ({
                     disabled={isSavingRequirements}
                     className="w-full sm:w-auto"
                   >
-                    {isSavingRequirements ? '保存中...' : '保存额外要求'}
+                    {isSavingRequirements ? 'Saving...' : 'Save Extra Requirements'}
                   </Button>
                 </div>
 
-                {/* 风格描述 */}
+                {/* Style Description */}
                 <div className="bg-blue-50 rounded-lg p-6 space-y-4">
                   <div>
-                    <h4 className="text-base font-semibold text-gray-900 mb-2">风格描述</h4>
+                    <h4 className="text-base font-semibold text-gray-900 mb-2">Style Description</h4>
                     <p className="text-sm text-gray-600">
-                      描述您期望的 PPT 整体风格，AI 将根据描述生成相应风格的页面
+                      Describe your desired overall PPT style, and AI will generate pages accordingly.
                     </p>
                   </div>
                   <Textarea
                     value={templateStyle}
                     onChange={(e) => onTemplateStyleChange(e.target.value)}
-                    placeholder="例如：简约商务风格，使用深蓝色和白色配色，字体清晰大方，布局整洁..."
+                    placeholder="E.g., Minimalist business style, using deep blue and white color scheme, clear and generous fonts, neat layout..."
                     rows={5}
                     className="text-sm"
                   />
@@ -202,13 +202,13 @@ export const ProjectSettingsModal: React.FC<ProjectSettingsModalProps> = ({
                       disabled={isSavingTemplateStyle}
                       className="w-full sm:w-auto"
                     >
-                      {isSavingTemplateStyle ? '保存中...' : '保存风格描述'}
+                      {isSavingTemplateStyle ? 'Saving...' : 'Save Style Description'}
                     </Button>
                   </div>
                   <div className="bg-blue-100 rounded-md p-3">
                     <p className="text-xs text-blue-900">
-                      💡 <strong>提示：</strong>风格描述会在生成图片时自动添加到提示词中。
-                      如果同时上传了模板图片，风格描述会作为补充说明。
+                      💡 <strong>Tip:</strong> Style description will be automatically added to the prompt when generating images.
+                      If a template image is uploaded, the style description will serve as supplementary instruction.
                     </p>
                   </div>
                 </div>
@@ -216,18 +216,18 @@ export const ProjectSettingsModal: React.FC<ProjectSettingsModalProps> = ({
             ) : activeTab === 'export' ? (
               <div className="max-w-3xl space-y-6">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">可编辑 PPTX 导出设置</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Editable PPTX Export Settings</h3>
                   <p className="text-sm text-gray-600 mb-6">
-                    配置「导出可编辑 PPTX」功能的处理方式。这些设置影响导出质量和API调用成本。
+                    Configure how "Export Editable PPTX" function works. These settings affect export quality and API costs.
                   </p>
                 </div>
 
-                {/* 组件提取方法 */}
+                {/* Extractor Method */}
                 <div className="bg-gray-50 rounded-lg p-6 space-y-4">
                   <div>
-                    <h4 className="text-base font-semibold text-gray-900 mb-2">组件提取方法</h4>
+                    <h4 className="text-base font-semibold text-gray-900 mb-2">Component Extraction Method</h4>
                     <p className="text-sm text-gray-600">
-                      选择如何从PPT图片中提取文字、表格等可编辑组件
+                      Choose how to extract editable components like text and tables from PPT images.
                     </p>
                   </div>
                   <div className="space-y-3">
@@ -257,12 +257,12 @@ export const ProjectSettingsModal: React.FC<ProjectSettingsModalProps> = ({
                   </div>
                 </div>
 
-                {/* 背景图获取方法 */}
+                {/* Background Inpaint Method */}
                 <div className="bg-orange-50 rounded-lg p-6 space-y-4">
                   <div>
-                    <h4 className="text-base font-semibold text-gray-900 mb-2">背景图获取方法</h4>
+                    <h4 className="text-base font-semibold text-gray-900 mb-2">Background Acquisition Method</h4>
                     <p className="text-sm text-gray-600">
-                      选择如何生成干净的背景图（移除原图中的文字后用于PPT背景）
+                      Choose how to generate clean background images (removing text from original image for PPT background).
                     </p>
                   </div>
                   <div className="space-y-3">
@@ -289,7 +289,7 @@ export const ProjectSettingsModal: React.FC<ProjectSettingsModalProps> = ({
                             {option.usesAI && (
                               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
                                 <Sparkles size={12} />
-                                使用文生图模型
+                                Uses Text-to-Image Model
                               </span>
                             )}
                           </div>
@@ -301,13 +301,13 @@ export const ProjectSettingsModal: React.FC<ProjectSettingsModalProps> = ({
                   <div className="bg-amber-100 rounded-md p-3 flex items-start gap-2">
                     <AlertTriangle size={16} className="text-amber-700 flex-shrink-0 mt-0.5" />
                     <p className="text-xs text-amber-900">
-                      <strong>成本提示：</strong>标有「使用文生图模型」的选项会调用AI图片生成API（如Gemini），
-                      每页会产生额外的API调用费用。如果需要控制成本，可选择「百度修复」方式。
+                      <strong>Cost Note:</strong> Options marked with "Uses Text-to-Image Model" will call AI image generation APIs (like Gemini),
+                      incurring extra API costs per page. If cost control is needed, choose "Baidu Erasure Service".
                     </p>
                   </div>
                 </div>
 
-                {/* 保存按钮 */}
+                {/* Save Button */}
                 {onSaveExportSettings && (
                   <div className="flex justify-end pt-4">
                     <Button
@@ -315,7 +315,7 @@ export const ProjectSettingsModal: React.FC<ProjectSettingsModalProps> = ({
                       onClick={onSaveExportSettings}
                       disabled={isSavingExportSettings}
                     >
-                      {isSavingExportSettings ? '保存中...' : '保存导出设置'}
+                      {isSavingExportSettings ? 'Saving...' : 'Save Export Settings'}
                     </Button>
                   </div>
                 )}
@@ -323,12 +323,12 @@ export const ProjectSettingsModal: React.FC<ProjectSettingsModalProps> = ({
             ) : (
               <div className="max-w-4xl">
                 <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">全局设置</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Global Settings</h3>
                   <p className="text-sm text-gray-600">
-                    这些设置应用于所有项目
+                    These settings apply to all projects.
                   </p>
                 </div>
-                {/* 复用 Settings 组件的内容 */}
+                {/* Reuse Settings Component Content */}
                 <Settings />
               </div>
             )}

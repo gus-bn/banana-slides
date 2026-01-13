@@ -7,21 +7,21 @@ import type { Material } from '@/api/endpoints';
 import { ImagePlus, X } from 'lucide-react';
 
 const presetTemplates = [
-  { id: '1', name: '复古卷轴', preview: '/templates/template_y.png' },
-  { id: '2', name: '矢量插画', preview: '/templates/template_vector_illustration.png' },
-  { id: '3', name: '拟物玻璃', preview: '/templates/template_glass.png' },
+  { id: '1', name: 'Vintage Scroll', preview: '/templates/template_y.png' },
+  { id: '2', name: 'Vector Illustration', preview: '/templates/template_vector_illustration.png' },
+  { id: '3', name: 'Skeuomorphic Glass', preview: '/templates/template_glass.png' },
   
-  { id: '4', name: '科技蓝', preview: '/templates/template_b.png' },
-  { id: '5', name: '简约商务', preview: '/templates/template_s.png' },
-  { id: '6', name: '学术报告', preview: '/templates/template_academic.jpg' },
+  { id: '4', name: 'Tech Blue', preview: '/templates/template_b.png' },
+  { id: '5', name: 'Minimalist Business', preview: '/templates/template_s.png' },
+  { id: '6', name: 'Academic Report', preview: '/templates/template_academic.jpg' },
 ];
 
 interface TemplateSelectorProps {
   onSelect: (templateFile: File | null, templateId?: string) => void;
   selectedTemplateId?: string | null;
   selectedPresetTemplateId?: string | null;
-  showUpload?: boolean; // 是否显示上传到用户模板库的选项
-  projectId?: string | null; // 项目ID，用于素材选择器
+  showUpload?: boolean; // Whether to show the option to upload to user template library
+  projectId?: string | null; // Project ID, used for material selector
 }
 
 export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
@@ -35,10 +35,10 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
   const [isLoadingTemplates, setIsLoadingTemplates] = useState(false);
   const [isMaterialSelectorOpen, setIsMaterialSelectorOpen] = useState(false);
   const [deletingTemplateId, setDeletingTemplateId] = useState<string | null>(null);
-  const [saveToLibrary, setSaveToLibrary] = useState(true); // 上传模板时是否保存到模板库（默认勾选）
+  const [saveToLibrary, setSaveToLibrary] = useState(true); // Upload template saves to template library by default
   const { show, ToastContainer } = useToast();
 
-  // 加载用户模板列表
+  // Load user templates
   useEffect(() => {
     loadUserTemplates();
   }, []);
@@ -51,7 +51,7 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
         setUserTemplates(response.data.templates);
       }
     } catch (error: any) {
-      console.error('加载用户模板失败:', error);
+      console.error('Failed to load user templates:', error);
     } finally {
       setIsLoadingTemplates(false);
     }
@@ -62,47 +62,47 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
     if (file) {
       try {
         if (showUpload) {
-          // 主页模式：直接上传到用户模板库
+          // Home mode: Upload directly to user template library
           const response = await uploadUserTemplate(file);
           if (response.data) {
             const template = response.data;
             setUserTemplates(prev => [template, ...prev]);
             onSelect(null, template.template_id);
-            show({ message: '模板上传成功', type: 'success' });
+            show({ message: 'Template uploaded successfully', type: 'success' });
           }
         } else {
-          // 预览页模式：根据 saveToLibrary 状态决定是否保存到模板库
+          // Preview mode: Decide whether to save to template library based on saveToLibrary state
           if (saveToLibrary) {
-            // 保存到模板库并应用
+            // Save to template library and apply
             const response = await uploadUserTemplate(file);
             if (response.data) {
               const template = response.data;
               setUserTemplates(prev => [template, ...prev]);
               onSelect(file, template.template_id);
-              show({ message: '模板已保存到模板库', type: 'success' });
+              show({ message: 'Template saved to library', type: 'success' });
             }
           } else {
-            // 仅应用到项目
+            // Only apply to project
             onSelect(file);
           }
         }
       } catch (error: any) {
-        console.error('上传模板失败:', error);
-        show({ message: '模板上传失败: ' + (error.message || '未知错误'), type: 'error' });
+        console.error('Template upload failed:', error);
+        show({ message: 'Template upload failed: ' + (error.message || 'Unknown error'), type: 'error' });
       }
     }
-    // 清空 input，允许重复选择同一文件
+    // Clear input to allow re-selecting the same file
     e.target.value = '';
   };
 
   const handleSelectUserTemplate = (template: UserTemplate) => {
-    // 立即更新选择状态（不加载File，提升响应速度）
+    // Immediately update selection state (do not load File, improve responsiveness)
     onSelect(null, template.template_id);
   };
 
   const handleSelectPresetTemplate = (templateId: string, preview: string) => {
     if (!preview) return;
-    // 立即更新选择状态（不加载File，提升响应速度）
+    // Immediately update selection state (do not load File, improve responsiveness)
     onSelect(null, templateId);
   };
 
@@ -110,45 +110,45 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
     if (materials.length === 0) return;
     
     try {
-      // 将第一个素材转换为File对象
+      // Convert first material to File object
       const file = await materialUrlToFile(materials[0]);
       
-      // 根据 saveAsTemplate 参数决定是否保存到模板库
+      // Decide whether to save to template library based on saveAsTemplate param
       if (saveAsTemplate) {
-        // 保存到用户模板库
+        // Save to user template library
         const response = await uploadUserTemplate(file);
         if (response.data) {
           const template = response.data;
           setUserTemplates(prev => [template, ...prev]);
-          // 传递文件和模板ID，适配不同的使用场景
+          // Pass file and template ID, adapt to different usage scenarios
           onSelect(file, template.template_id);
-          show({ message: '素材已保存到模板库', type: 'success' });
+          show({ message: 'Material saved to template library', type: 'success' });
         }
       } else {
-        // 仅作为模板使用
+        // Use as template only
         onSelect(file);
-        show({ message: '已从素材库选择作为模板', type: 'success' });
+        show({ message: 'Selected from material library as template', type: 'success' });
       }
     } catch (error: any) {
-      console.error('加载素材失败:', error);
-      show({ message: '加载素材失败: ' + (error.message || '未知错误'), type: 'error' });
+      console.error('Failed to load material:', error);
+      show({ message: 'Failed to load material: ' + (error.message || 'Unknown error'), type: 'error' });
     }
   };
 
   const handleDeleteUserTemplate = async (template: UserTemplate, e: React.MouseEvent) => {
     e.stopPropagation();
     if (selectedTemplateId === template.template_id) {
-      show({ message: '当前使用中的模板不能删除，请先取消选择或切换', type: 'info' });
+      show({ message: 'Cannot delete currently active template, please unselect or switch first', type: 'info' });
       return;
     }
     setDeletingTemplateId(template.template_id);
     try {
       await deleteUserTemplate(template.template_id);
       setUserTemplates((prev) => prev.filter((t) => t.template_id !== template.template_id));
-      show({ message: '模板已删除', type: 'success' });
+      show({ message: 'Template deleted', type: 'success' });
     } catch (error: any) {
-      console.error('删除模板失败:', error);
-      show({ message: '删除模板失败: ' + (error.message || '未知错误'), type: 'error' });
+      console.error('Failed to delete template:', error);
+      show({ message: 'Failed to delete template: ' + (error.message || 'Unknown error'), type: 'error' });
     } finally {
       setDeletingTemplateId(null);
     }
@@ -157,10 +157,10 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
   return (
     <>
       <div className="space-y-4">
-        {/* 用户已保存的模板 */}
+        {/* User Saved Templates */}
         {userTemplates.length > 0 && (
           <div>
-            <h4 className="text-sm font-medium text-gray-700 mb-2">我的模板</h4>
+            <h4 className="text-sm font-medium text-gray-700 mb-2">My Templates</h4>
             <div className="grid grid-cols-4 gap-4 mb-4">
               {userTemplates.map((template) => (
                 <div
@@ -177,7 +177,7 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
                     alt={template.name || 'Template'}
                     className="absolute inset-0 w-full h-full object-cover"
                   />
-                  {/* 删除按钮：仅用户模板，且未被选中时显示（常显） */}
+                  {/* Delete button: Only for user templates, and shown when not selected (always visible) */}
                   {selectedTemplateId !== template.template_id && (
                     <button
                       type="button"
@@ -186,14 +186,14 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
                       className={`absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center shadow z-20 opacity-0 group-hover:opacity-100 transition-opacity ${
                         deletingTemplateId === template.template_id ? 'opacity-60 cursor-not-allowed' : ''
                       }`}
-                      aria-label="删除模板"
+                      aria-label="Delete Template"
                     >
                       <X size={12} />
                     </button>
                   )}
                   {selectedTemplateId === template.template_id && (
                     <div className="absolute inset-0 bg-banana-500 bg-opacity-20 flex items-center justify-center pointer-events-none">
-                      <span className="text-white font-semibold text-sm">已选择</span>
+                      <span className="text-white font-semibold text-sm">Selected</span>
                     </div>
                   )}
                 </div>
@@ -203,9 +203,9 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
         )}
 
         <div>
-          <h4 className="text-sm font-medium text-gray-700 mb-2">预设模板</h4>
+          <h4 className="text-sm font-medium text-gray-700 mb-2">Preset Templates</h4>
           <div className="grid grid-cols-4 gap-4">
-            {/* 预设模板 */}
+            {/* Preset Templates */}
             {presetTemplates.map((template) => (
               <div
                 key={template.id}
@@ -225,7 +225,7 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
                     />
                     {selectedPresetTemplateId === template.id && (
                       <div className="absolute inset-0 bg-banana-500 bg-opacity-20 flex items-center justify-center pointer-events-none">
-                        <span className="text-white font-semibold text-sm">已选择</span>
+                        <span className="text-white font-semibold text-sm">Selected</span>
                       </div>
                     )}
                   </>
@@ -235,10 +235,10 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
               </div>
             ))}
 
-            {/* 上传新模板 */}
+            {/* Upload New Template */}
             <label className="aspect-[4/3] rounded-lg border-2 border-dashed border-gray-300 hover:border-banana-500 cursor-pointer transition-all flex flex-col items-center justify-center gap-2 relative overflow-hidden">
               <span className="text-2xl">+</span>
-              <span className="text-sm text-gray-500">上传模板</span>
+              <span className="text-sm text-gray-500">Upload</span>
               <input
                 type="file"
                 accept="image/*"
@@ -249,7 +249,7 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
             </label>
           </div>
           
-          {/* 在预览页显示：上传模板时是否保存到模板库的选项 */}
+          {/* Show in preview page: Option to save to template library when uploading */}
           {!showUpload && (
             <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
               <label className="flex items-center gap-2 cursor-pointer">
@@ -260,17 +260,17 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
                   className="w-4 h-4 text-banana-500 border-gray-300 rounded focus:ring-banana-500"
                 />
                 <span className="text-sm text-gray-700">
-                  上传模板时同时保存到我的模板库
+                  Also save to my template library
                 </span>
               </label>
             </div>
           )}
         </div>
 
-        {/* 从素材库选择作为模板 */}
+        {/* Select from Material Library */}
         {projectId && (
           <div className="mt-4">
-            <h4 className="text-sm font-medium text-gray-700 mb-2">从素材库选择</h4>
+            <h4 className="text-sm font-medium text-gray-700 mb-2">Select from Material Library</h4>
             <Button
               variant="secondary"
               size="sm"
@@ -278,13 +278,13 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
               onClick={() => setIsMaterialSelectorOpen(true)}
               className="w-full"
             >
-              从素材库选择作为模板
+              Select from Material Library as Template
             </Button>
           </div>
         )}
       </div>
       <ToastContainer />
-      {/* 素材选择器 */}
+      {/* Material Selector */}
       {projectId && (
         <MaterialSelector
           projectId={projectId}
@@ -300,16 +300,16 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({
 };
 
 /**
- * 根据模板ID获取模板File对象（按需加载）
- * @param templateId 模板ID
- * @param userTemplates 用户模板列表
+ * Get template File object by template ID (load on demand)
+ * @param templateId Template ID
+ * @param userTemplates User template list
  * @returns Promise<File | null>
  */
 export const getTemplateFile = async (
   templateId: string,
   userTemplates: UserTemplate[]
 ): Promise<File | null> => {
-  // 检查是否是预设模板
+  // Check if it is a preset template
   const presetTemplate = presetTemplates.find(t => t.id === templateId);
   if (presetTemplate && presetTemplate.preview) {
     try {
@@ -317,12 +317,12 @@ export const getTemplateFile = async (
       const blob = await response.blob();
       return new File([blob], presetTemplate.preview.split('/').pop() || 'template.png', { type: blob.type });
     } catch (error) {
-      console.error('加载预设模板失败:', error);
+      console.error('Failed to load preset template:', error);
       return null;
     }
   }
 
-  // 检查是否是用户模板
+  // Check if it is a user template
   const userTemplate = userTemplates.find(t => t.template_id === templateId);
   if (userTemplate) {
     try {
@@ -331,7 +331,7 @@ export const getTemplateFile = async (
       const blob = await response.blob();
       return new File([blob], 'template.png', { type: blob.type });
     } catch (error) {
-      console.error('加载用户模板失败:', error);
+      console.error('Failed to load user template:', error);
       return null;
     }
   }

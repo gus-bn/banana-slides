@@ -37,7 +37,7 @@ export const SlideCard: React.FC<SlideCardProps> = ({
       }`}
       onClick={onClick}
     >
-      {/* 缩略图 */}
+      {/* Thumbnail */}
       <div className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden mb-2">
         {generating ? (
           <Skeleton className="w-full h-full" />
@@ -48,7 +48,7 @@ export const SlideCard: React.FC<SlideCardProps> = ({
               alt={`Slide ${index + 1}`}
               className="w-full h-full object-cover"
             />
-            {/* 悬停操作 */}
+            {/* Hover Actions */}
             <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
               <button
                 onClick={(e) => {
@@ -63,9 +63,9 @@ export const SlideCard: React.FC<SlideCardProps> = ({
                 onClick={(e) => {
                   e.stopPropagation();
                   confirm(
-                    '确定要删除这一页吗？',
+                    'Are you sure you want to delete this page?',
                     onDelete,
-                    { title: '确认删除', variant: 'danger' }
+                    { title: 'Confirm Delete', variant: 'danger' }
                   );
                 }}
                 className="p-2 bg-white rounded-lg hover:bg-red-50 transition-colors"
@@ -78,18 +78,18 @@ export const SlideCard: React.FC<SlideCardProps> = ({
           <div className="w-full h-full flex items-center justify-center text-gray-400">
             <div className="text-center">
               <div className="text-3xl mb-1">🍌</div>
-              <div className="text-xs">未生成</div>
+              <div className="text-xs">Not Generated</div>
             </div>
           </div>
         )}
         
-        {/* 状态标签 */}
+        {/* Status Badge */}
         <div className="absolute bottom-2 right-2">
           <StatusBadge status={page.status} />
         </div>
       </div>
 
-      {/* 标题 */}
+      {/* Title */}
       <div className="flex items-center gap-2">
         <span
           className={`text-sm font-medium ${

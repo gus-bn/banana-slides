@@ -3,14 +3,14 @@ import { twMerge } from 'tailwind-merge';
 import type { Project, Page } from '@/types';
 
 /**
- * 合并 className (支持 Tailwind CSS)
+ * Merge className (supports Tailwind CSS)
  */
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
 /**
- * 标准化后端返回的项目数据
+ * Normalize project data returned from backend
  */
 export function normalizeProject(data: any): Project {
   return {
@@ -22,7 +22,7 @@ export function normalizeProject(data: any): Project {
 }
 
 /**
- * 标准化后端返回的页面数据
+ * Normalize page data returned from backend
  */
 export function normalizePage(data: any): Page {
   return {
@@ -33,7 +33,7 @@ export function normalizePage(data: any): Page {
 }
 
 /**
- * 防抖函数
+ * Debounce function
  */
 export function debounce<T extends (...args: any[]) => any>(
   func: T,
@@ -47,7 +47,7 @@ export function debounce<T extends (...args: any[]) => any>(
 }
 
 /**
- * 节流函数
+ * Throttle function
  */
 export function throttle<T extends (...args: any[]) => any>(
   func: T,
@@ -64,7 +64,7 @@ export function throttle<T extends (...args: any[]) => any>(
 }
 
 /**
- * 下载文件
+ * Download file
  */
 export function downloadFile(blob: Blob, filename: string) {
   const url = window.URL.createObjectURL(blob);
@@ -78,40 +78,40 @@ export function downloadFile(blob: Blob, filename: string) {
 }
 
 /**
- * 格式化日期
+ * Format date
  */
 export function formatDate(dateString: string): string {
   const date = new Date(dateString);
-  return date.toLocaleString('zh-CN', {
+  return date.toLocaleString('en-US', {
     year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
+    month: 'short',
+    day: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
   });
 }
 
 /**
- * 生成唯一ID
+ * Generate unique ID
  */
 export function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 }
 
 /**
- * 将错误消息转换为友好的中文提示
+ * Normalize error messages to friendly English prompts
  */
 export function normalizeErrorMessage(errorMessage: string | null | undefined): string {
-  if (!errorMessage) return '操作失败';
+  if (!errorMessage) return 'Operation failed';
   
   const message = errorMessage.toLowerCase();
   
   if (message.includes('no template image found')) {
-    return '当前项目还没有模板，请先点击页面工具栏的"更换模板"按钮，选择或上传一张模板图片后再生成。';
+    return 'No template image found for the current project. Please click "Change Template" in the toolbar to select or upload a template image before generating.';
   } else if (message.includes('page must have description content')) {
-    return '该页面还没有描述内容，请先在"编辑页面描述"步骤为此页生成或填写描述。';
+    return 'This page does not have description content yet. Please generate or fill in the description in the "Edit Page Description" step first.';
   } else if (message.includes('image already exists')) {
-    return '该页面已经有图片，如需重新生成，请在生成时选择"重新生成"或稍后重试。';
+    return 'This page already has an image. If you need to regenerate, please select "Regenerate" or try again later.';
   }
   
   return errorMessage;

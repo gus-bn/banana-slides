@@ -1,115 +1,115 @@
-// 预设 PPT 风格描述配置
+// Preset PPT Style Description Configuration
 
 export interface PresetStyle {
     id: string;
     name: string;
-    description: string; // 这里的描述已更新为详细的 AI 文生图 Prompt
-    previewImage?: string; // 可选的预览图片路径
+    description: string; // The description here has been updated to detailed AI text-to-image prompts
+    previewImage?: string; // Optional preview image path
   }
   
   export const PRESET_STYLES: PresetStyle[] = [
     {
       id: 'business-simple',
-      name: '简约商务',
-      // 备选方案：背景色可改为深沉的“海军蓝”（#0B1F3B），此时前景需改为纯白（#FFFFFF）。
-      description: `视觉描述：全局视觉语言应体现国际顶级咨询公司（如麦肯锡或波士顿咨询）的专业与稳重。整体风格追求极致的扁平化与秩序感，拒绝多余的装饰，强调信息的清晰传达。光照环境应为均匀的演播室漫射光，无明显的戏剧性阴影，确保画面干净透亮。
+      name: 'Minimalist Business',
+      // Alternative: Background color can be changed to deep "Navy Blue" (#0B1F3B), in which case foreground should be pure white (#FFFFFF).
+      description: `Visual Description: The global visual language should reflect the professionalism and stability of top international consulting firms (such as McKinsey or BCG). The overall style pursues extreme flatness and a sense of order, rejecting superfluous decoration and emphasizing clear information transmission. The lighting environment should be uniform studio diffused light, without obvious dramatic shadows, ensuring the picture is clean and translucent.
   
- 配色与材质：背景色必须锁定为深沉、权威的“海军蓝”（Navy Blue, #0B1F3B），前景元素则使用纯白（ #FFFFFF）和微量的天蓝色（Sky Blue, #38BDF8）作为点缀；材质上避免复杂的纹理，采用哑光纸张质感或平滑的矢量色块。
+ Color & Material: The background color must be locked to a deep, authoritative "Navy Blue" (#0B1F3B), while foreground elements use pure white (#FFFFFF) with traces of Sky Blue (#38BDF8) as accents; materials should avoid complex textures, using matte paper texture or smooth vector color blocks.
   
-  内容与排版：排版逻辑遵循严格的模块化网格系统。请生成清晰的几何分区，使用细线条或微弱的浅灰色色块（Light Gray, #E5E7EB）来划分内容区域。字体方面，应用粗壮有力的无衬线字体（如Helvetica或Roboto）作为标题，正文保持纤细清晰。图表元素应为扁平化的2D矢量图形，如简洁的柱状图或饼图，配色单一且克制。
+  Content & Layout: The layout logic follows a strict modular grid system. Please generate clear geometric partitions, using thin lines or faint Light Gray (#E5E7EB) color blocks to divide content areas. For fonts, apply strong sans-serif fonts (such as Helvetica or Roboto) for headings, keeping body text slender and clear. Chart elements should be flat 2D vector graphics, such as simple bar charts or pie charts, with a single and restrained color scheme.
   
-  渲染要求：矢量插画风格，极高清晰度，无论是文字还是图形边缘都要锐利无锯齿，展现出严谨的商务美学，适合世界500强企业汇报场景。`,
+  Rendering Requirements: Vector illustration style, extremely high definition, ensuring sharp and anti-aliased edges for both text and graphics, demonstrating rigorous business aesthetics, suitable for Fortune 500 corporate reporting scenarios.`,
       previewImage: '/preset-previews/business-simple.webp',
     },
     {
       id: 'tech-modern',
-      name: '现代科技',
-      // 备选方案：背景色可改为“深空灰”（#1F2937）；元素可改为“四面体”或“芯片结构”；纹理可改为“电路板”或“二进制代码流”。
-      description: `视觉描述：全局视觉语言要融合赛博朋克与现代SaaS产品的未来感。整体氛围神秘、深邃且富有动感，仿佛置身于高科技的数据中心或虚拟空间。光照采用暗调环境下的自发光效果，模拟霓虹灯管和激光的辉光。
+      name: 'Modern Tech',
+      // Alternative: Background color can be changed to "Deep Space Gray" (#1F2937); elements can be changed to "tetrahedrons" or "chip structures"; textures can be changed to "circuit boards" or "binary code streams".
+      description: `Visual Description: The global visual language should blend Cyberpunk with the futuristic feel of modern SaaS products. The overall atmosphere is mysterious, profound, and dynamic, as if in a high-tech data center or virtual space. Lighting uses self-luminous effects in a dark environment, simulating the glow of neon tubes and lasers.
   
- 配色与材质：背景色采用深邃的“午夜黑”（Midnight Black, #0B0F19），以衬托前景的亮度。主色调使用高饱和度的“电光蓝”（Electric Blue, #00A3FF）与“赛博紫”（Cyber Purple, #7C3AED）进行线性渐变，营造出流动的能量感。材质上大量运用半透明的玻璃、发光的网格线以及带有金属光泽的几何体。
+ Color & Material: The background color uses a deep "Midnight Black" (#0B0F19) to set off the brightness of the foreground. The main tone uses a linear gradient of high-saturation "Electric Blue" (#00A3FF) and "Cyber Purple" (#7C3AED) to create a sense of flowing energy. Materials make extensive use of semi-transparent glass, glowing grid lines, and geometric bodies with metallic luster.
   
-  内容与排版：画面中应包含悬浮的3D几何元素（如立方体、四面体或芯片结构），这些元素应带有线框渲染（Wireframe）效果。排版布局倾向于不对称的动态平衡，使用具有科技感的等宽字体或现代无衬线体。背景中可以隐约添加电路板纹理、二进制代码流或点阵地图作为装饰，增加细节密度。
+  Content & Layout: The screen should contain floating 3D geometric elements (such as cubes, tetrahedrons, or chip structures) with Wireframe rendering effects. The layout tends towards asymmetrical dynamic balance, using tech-style monospaced fonts or modern sans-serifs. Circuit board textures, binary code streams, or dot matrix maps can be faintly added to the background as decoration to increase detail density.
   
-  渲染要求：Octane Render渲染风格，强调光线追踪、辉光（Bloom）效果和景深控制，呈现出精细的粒子特效和充满科技张力的视觉冲击力。`,
+  Rendering Requirements: Octane Render style, emphasizing ray tracing, Bloom effects, and depth of field control, presenting fine particle effects and a visual impact full of technological tension.`,
       previewImage: '/preset-previews/tech-modern.webp',
     },
     {
       id: 'academic-formal',
-      name: '严谨学术',
-      // 备选方案：背景色可改为“冷灰色”（#F2F4F7）；强调色可改为“深蓝”（#1E3A8A）。
-      description: `视觉描述：全局视觉语言应模仿高质量印刷出版物或经典论文的排版风格，传达理性、客观和知识的厚重感。整体氛围安静、克制，没有任何干扰视线的炫光或过度设计。画面必须铺满全屏，严禁出现书本装订线、纸张边缘、卷角、阴影或任何形式的边框。背景不应该呈现三维立体，而应该以二维平面方式呈现。
+      name: 'Rigorous Academic',
+      // Alternative: Background color can be changed to "Cool Gray" (#F2F4F7); accent color can be changed to "Deep Blue" (#1E3A8A).
+      description: `Visual Description: The global visual language should imitate the layout style of high-quality printed publications or classic papers, conveying rationality, objectivity, and the weight of knowledge. The overall atmosphere is quiet and restrained, without any glare or over-design that distracts the line of sight. The picture must fill the full screen, strictly forbidding book binding lines, paper edges, curled corners, shadows, or any form of borders. The background should not present a 3D effect but should be presented in a 2D planar way.
   
- 配色与材质：背景色严格限制为“米白色”（Off-white, #F8F7F2），模拟高级道林纸的质感。前景色仅使用纯黑（#000000）、深炭灰（Charcoal, #1F2937）和作为强调色的深红（Deep Red, #7F1D1D）或深蓝（Deep Blue, #1E3A8A）（这种强调色占比不超过5%）。材质完全呈现为高质量的纸质印刷效果，具有细腻的纸张纹理。
+ Color & Material: The background color is strictly limited to "Off-white" (#F8F7F2), simulating the texture of high-grade Daolin paper. The foreground uses only pure black (#000000), deep Charcoal (#1F2937), and Deep Red (#7F1D1D) or Deep Blue (#1E3A8A) as accent colors (this accent color accounts for no more than 5%). Materials fully present high-quality paper printing effects with delicate paper textures.
   
-  内容与排版：排版必须遵循经典的版式设计原则，拥有宽阔的页边距。请使用带有衬线的字体（类似Times New Roman或Garamond）来体现传统与正式。视觉元素主要由精细的黑色线条框（Black, #000000）、标准的学术表格样式和黑白线稿插图（Black, #000000 / White, #FFFFFF）组成。布局上采用左右分栏或上下结构的严谨对齐方式。
+  Content & Layout: The layout must follow classic typographic design principles, with wide margins. Please use serif fonts (similar to Times New Roman or Garamond) to reflect tradition and formality. Visual elements mainly consist of fine black line frames (Black, #000000), standard academic table styles, and black and white line art illustrations (Black, #000000 / White, #FFFFFF). The layout uses a rigorous alignment of left-right columns or top-bottom structures.
   
-  渲染要求：超高分辨率扫描件风格，强调字体的灰度抗锯齿效果和线条的锐度，画面如同精装学术期刊的内页，展现出绝对的专业性与权威性。不应该存在任何形式的页面边框，比如黑色边框或者阴影边线。`,
+  Rendering Requirements: Ultra-high-resolution scan style, emphasizing grayscale anti-aliasing of fonts and sharpness of lines, the picture is like the inner page of a hardcover academic journal, demonstrating absolute professionalism and authority. There should not be any form of page borders, such as black borders or shadow edge lines.`,
       previewImage: '/preset-previews/academic-formal.webp',
     },
     {
       id: 'creative-fun',
-      name: '活泼创意',
-      // 备选方案：背景色可改为“暖黄色”（#FFD54A）；风格可改为“剪纸风格”或“粗糙边缘插画”。
-      description: `视觉描述：全局视觉语言要像一个充满活力的初创公司Pitch Deck或儿童教育应用界面。整体氛围轻松、愉悦、充满想象力，打破常规的束缚。光照明亮且充满阳光感，色彩之间没有阴影，呈现彻底的扁平化。
+      name: 'Creative Fun',
+      // Alternative: Background color can be changed to "Warm Yellow" (#FFD54A); style can be changed to "paper cut style" or "rough edge illustration".
+      description: `Visual Description: The global visual language should look like a pitch deck for a vibrant startup or a children's educational app interface. The overall atmosphere is relaxed, joyful, and full of imagination, breaking the shackles of convention. The lighting is bright and sunny, with no shadows between colors, presenting complete flatness.
   
- 配色与材质：背景色使用高明度的“暖黄色”（Warm Yellow, #FFD54A）。配色方案极其大胆，混合使用鲜艳的“活力橙”（Vibrant Orange, #FF6A00）、“草绿”（Grass Green, #22C55E）和“天蓝”（Sky Blue, #38BDF8），形成孟菲斯（Memphis）风格的撞色效果。材质上模拟手绘涂鸦、剪纸或粗糙边缘的矢量插画。
+ Color & Material: The background color uses high-brightness "Warm Yellow" (#FFD54A). The color scheme is extremely bold, mixing vivid "Vibrant Orange" (#FF6A00), "Grass Green" (#22C55E), and "Sky Blue" (#38BDF8) to form a Memphis style contrasting color effect. Materials simulate hand-drawn doodles, paper cuts, or rough-edged vector illustrations.
   
-  内容与排版：画面内容应包含手绘风格的插图元素，如涂鸦箭头、星星、波浪线和不规则的有机形状色块。排版上允许文字倾斜、重叠或跳跃，打破僵硬的网格。字体选用圆润可爱的圆体或手写体。请在角落放置一些拟人化的可爱物体或夸张的对话气泡。
+  Content & Layout: The screen content should contain hand-drawn style illustration elements, such as doodle arrows, stars, wavy lines, and irregular organic shape color blocks. The layout allows text to tilt, overlap, or jump, breaking the rigid grid. Fonts use rounded and cute rounded or handwritten fonts. Please place some anthropomorphic cute objects or exaggerated speech bubbles in the corners.
   
-  渲染要求：Dribbble热门插画风格，色彩鲜艳平涂，线条流畅且富有弹性，视觉上给人一种快乐、友好且极具亲和力的感觉。`,
+  Rendering Requirements: Dribbble popular illustration style, bright flat colors, smooth and elastic lines, visually giving a happy, friendly, and very approachable feeling.`,
       previewImage: '/preset-previews/creative-fun.webp',
     },
     {
       id: 'minimalist-clean',
-      name: '极简清爽',
-      // 备选方案：视觉锚点可改为“极简摄影图片”；材质可改为“大理石纹理”。
-      description: `视觉描述：全局视觉语言借鉴北欧设计（Scandinavian Design）和Kinfolk杂志的审美。整体氛围空灵、静谧，强调“少即是多”的哲学。光照采用极柔和的漫反射天光，阴影非常淡且边缘模糊，营造出空气感。
+      name: 'Minimalist Clean',
+      // Alternative: Visual anchor can be changed to "minimalist photography"; material can be changed to "marble texture".
+      description: `Visual Description: The global visual language draws on Scandinavian Design and Kinfolk magazine aesthetics. The overall atmosphere is ethereal and quiet, emphasizing the philosophy of "less is more". Lighting uses extremely soft diffuse skylight, with very faint and blurred shadows, creating a sense of airiness.
   
-  配色与材质：背景色为极浅的“雾霾灰”（Haze Gray, #F5F5F7）。前景色仅使用中灰色（Mid Gray, #6B7280）和低饱和度的莫兰迪色系（如灰蓝（Morandi Gray Blue, #7A8FA6））作为微小的点缀。材质上体现细腻的哑光质感，偶尔出现一点点石膏（Plaster）的微纹理。
+  Color & Material: The background color is extremely light "Haze Gray" (#F5F5F7). The foreground uses only Mid Gray (#6B7280) and low-saturation Morandi colors (such as Morandi Gray Blue, #7A8FA6) as tiny accents. Materials reflect delicate matte textures, occasionally with a little Plaster micro-texture.
   
-  内容与排版：构图的核心是“留白”（Negative Space），留白面积应占据画面的70%以上。排版极为克制，文字字号较小，行间距宽大，使用纤细优雅的非衬线字体。视觉锚点是简单的几何线条构成的图标，布局上追求绝对的平衡。
+  Content & Layout: The core of the composition is "Negative Space", which should occupy more than 70% of the picture. The layout is extremely restrained, with small font sizes, wide line spacing, and slender and elegant sans-serif fonts. Visual anchors are icons composed of simple geometric lines, pursuing absolute balance in layout.
   
-  渲染要求：极简主义摄影风格，高动态范围（HDR），画面极其干净，没有任何噪点，展现出一种画廊般的艺术陈列感。`,
+  Rendering Requirements: Minimalist photography style, High Dynamic Range (HDR), the picture is extremely clean without any noise, demonstrating a gallery-like artistic display sense.`,
       previewImage: '/preset-previews/minimalist-clean.webp',
     },
     {
       id: 'luxury-premium',
-      name: '高端奢华',
-      // 备选方案：背景色可改为“墨绿”或“勃艮第红”；前景色可改为“玫瑰金”；材质可改为“大理石”或“黑金沙”。
-      description: `视觉描述：全局视觉语言要融合高端腕表广告或五星级酒店的品牌形象。整体氛围神秘、高贵、独一无二。光照采用戏剧性的伦勃朗光或聚光灯效果，重点照亮关键元素，其余部分隐没在黑暗中。
+      name: 'Luxury Premium',
+      // Alternative: Background color can be changed to "Dark Green" or "Burgundy"; foreground can be changed to "Rose Gold"; material can be changed to "Marble" or "Black Galaxy Granite".
+      description: `Visual Description: The global visual language should blend the brand image of high-end watch advertisements or five-star hotels. The overall atmosphere is mysterious, noble, and unique. Lighting uses dramatic Rembrandt lighting or spotlight effects to highlight key elements, leaving the rest in darkness.
   
-  配色与材质：背景色严格锁定为深沉的“曜石黑”（Obsidian Black, #0B0B0F）。前景色主要由“香槟金”（Champagne Gold, #F7E7CE）构成。材质上必须体现昂贵的触感，核心组合为：背景呈现哑光黑天鹅绒质感，前景装饰呈现拉丝金属质感。
+  Color & Material: The background color is strictly locked to deep "Obsidian Black" (#0B0B0F). The foreground is mainly composed of "Champagne Gold" (#F7E7CE). Materials must reflect expensive tactile sensations, with the core combination being: background presenting matte black velvet texture, foreground decoration presenting brushed metal texture.
   
-  内容与排版：排版采用经典的居中对齐或对称布局，强调仪式感。字体必须使用高雅的衬线体（Serif），字间距适当加宽以体现尊贵。画面中可以加入细致的金色边框线条、Art Deco风格的装饰纹样。如果有3D物体，应呈现出珠宝般的抛光质感。
+  Content & Layout: The layout uses classic center alignment or symmetrical layout, emphasizing a sense of ritual. Fonts must use elegant Serif fonts, with appropriately widened letter spacing to reflect dignity. Detailed gold border lines and Art Deco style decorative patterns can be added to the picture. If there are 3D objects, they should present a jewelry-like polished texture.
   
-  渲染要求：电影级写实渲染，强调材质的物理属性（PBR），特别是金属的高光反射和丝绒的漫反射细节，画面呈现出奢侈品广告大片的高级质感。`,
+  Rendering Requirements: Cinematic realistic rendering, emphasizing physical properties of materials (PBR), especially metal specular reflections and velvet diffuse reflection details, presenting the high-level texture of luxury goods advertising blockbusters.`,
       previewImage: '/preset-previews/luxury-premium.webp',
     },
     {
       id: 'nature-fresh',
-      name: '自然清新',
-      // 备选方案：背景色可改为“鼠尾草绿”或“亚麻色”；元素可改为“鹅卵石”或“水滴”。
-      description: `视觉描述：全局视觉语言旨在唤起人们对大自然、环保和健康生活的向往，类似全食超市（Whole Foods）或Aesop的品牌视觉。整体氛围治愈、透气、有机。光照模拟清晨穿过树叶的斑驳阳光（丁达尔效应），温暖而柔和。
+      name: 'Nature Fresh',
+      // Alternative: Background color can be changed to "Sage Green" or "Linen"; elements can be changed to "pebbles" or "water droplets".
+      description: `Visual Description: The global visual language aims to evoke people's yearning for nature, environmental protection, and healthy living, similar to the brand vision of Whole Foods or Aesop. The overall atmosphere is healing, breathable, and organic. Lighting simulates dappled sunlight (Tyndall effect) passing through leaves in the early morning, warm and soft.
   
-  配色与材质：背景色采用柔和的“米色”（Beige, #EAD9C6）。配色方案取自自然界，重点使用森林绿（Forest Green, #14532D）和大地棕（Earth Brown, #7A4E2D）。材质上强调天然纹理，如再生纸的颗粒感和植物叶片的脉络。
+  Color & Material: The background color uses soft "Beige" (#EAD9C6). The color scheme is taken from nature, focusing on Forest Green (#14532D) and Earth Brown (#7A4E2D). Materials emphasize natural textures, such as the graininess of recycled paper and the veins of plant leaves.
   
-  内容与排版：画面中应融合真实的自然元素，主要是伸展的绿植叶片，这些元素可以作为背景装饰或前景框架。排版使用圆润亲和的字体。布局上可以稍微松散，模仿自然生长的形态。阴影处理要柔和自然，避免生硬的黑色投影。
+  Content & Layout: The picture should integrate real natural elements, mainly extending green plant leaves, which can serve as background decorations or foreground frames. The layout uses rounded and affinity-rich fonts. The layout can be slightly loose, imitating the form of natural growth. Shadow processing should be soft and natural, avoiding harsh black projections.
   
-  渲染要求：微距摄影风格结合3D渲染，强调植物表面的透光感（Subsurface Scattering）和自然材质的细腻纹理，画面清新淡雅，令人心旷神怡。`,
+  Rendering Requirements: Macro photography style combined with 3D rendering, emphasizing the translucency (Subsurface Scattering) of plant surfaces and delicate textures of natural materials, the picture is fresh and elegant, making people feel refreshed.`,
       previewImage: '/preset-previews/nature-fresh.webp',
     },
     {
         id: 'gradient-vibrant',
-        name: '渐变活力',
-        // 备选方案：配色可改为“落日橙紫色系”；材质可改为“丝绸光泽”。
-        description: `视觉描述：全局视觉语言对标现代科技独角兽公司（如Stripe或Linear）的官网视觉，呈现一种极光般的流动美感。整体氛围梦幻、通透且富有呼吸感，避免刺眼的撞色，强调色彩之间的优雅融合。
+        name: 'Gradient Vibrant',
+        // Alternative: Color scheme can be changed to "Sunset Orange-Purple"; material can be changed to "Silk Luster".
+        description: `Visual Description: The global visual language benchmarks the official website visuals of modern tech unicorn companies (such as Stripe or Linear), presenting a flowing beauty like an aurora. The overall atmosphere is dreamy, transparent, and breathable, avoiding harsh contrasting colors and emphasizing the elegant fusion between colors.
 
-  配色与材质：背景即前景，使用全屏的弥散渐变色。配色方案采用高雅且和谐的“全息色系”，以深邃的“宝石蓝”（Royal Blue, #2563EB）为基底，平滑过渡到“紫罗兰”（Violet, #7C3AED）和明亮的“洋红色”（Magenta, #DB2777）。颜色之间如水彩般晕染，没有生硬的边界。材质上锁定为“磨砂玻璃（Frosted Glass）”质感，让色彩看起来像是透过一层雾面屏透出来的，增加朦胧的高级感。插画使用有质感的半立体彩色设计。
+  Color & Material: The background is the foreground, using a full-screen diffuse gradient color. The color scheme adopts an elegant and harmonious "Holographic Color System", based on deep "Royal Blue" (#2563EB), smoothly transitioning to "Violet" (#7C3AED) and bright "Magenta" (#DB2777). Colors blend like watercolors without hard boundaries. Materials are locked to "Frosted Glass" texture, making colors look like they are revealing through a layer of matte screen, adding a hazy high-level sense. Illustrations use textured semi-3D color designs.
 
-  内容与排版：画面核心是缓慢流动的有机波浪形状，形态柔和自然。排版上使用醒目的粗体无衬线字（Bold Sans-serif），文字颜色为纯白（#FFFFFF），以确保在多彩背景上的绝对清晰度。界面元素采用“玻璃拟态”（Glassmorphism），即高透明度的白色圆角卡片，带有细腻的白色描边和背景模糊效果。
+  Content & Layout: The core of the screen is slowly flowing organic wave shapes with soft and natural forms. The layout uses bold Sans-serif fonts, with text color as pure white (#FFFFFF) to ensure absolute clarity on colorful backgrounds. Interface elements adopt "Glassmorphism", i.e., high-transparency white rounded cards with delicate white strokes and background blur effects.
 
-  渲染要求：C4D流体模拟渲染，强调“丝绸”般的顺滑光泽，配合轻微的噪点（Grain）增加质感，色彩饱满但不刺眼，展现出流光溢彩的现代数字美学。`,
+  Rendering Requirements: C4D fluid simulation rendering, emphasizing "silk"-like smooth luster, combined with slight Grain to increase texture, colors are saturated but not glaring, demonstrating shimmering modern digital aesthetics.`,
         previewImage: '/preset-previews/gradient-vibrant.webp',
       },
   ];

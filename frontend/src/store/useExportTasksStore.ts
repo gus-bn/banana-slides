@@ -12,15 +12,15 @@ export interface ExportTask {
   projectId: string;
   type: ExportTaskType;
   status: ExportTaskStatus;
-  pageIds?: string[]; // 选中的页面ID列表，undefined表示全部
+  pageIds?: string[]; // Selected page ID list, undefined means all
   progress?: {
     total: number;
     completed: number;
     percent?: number;
     current_step?: string;
     messages?: string[];
-    warnings?: string[];  // 导出警告信息
-    warning_details?: {   // 警告详细信息
+    warnings?: string[];  // Export warning messages
+    warning_details?: {   // Warning details
       style_extraction_failed?: Array<{ element_id: string; reason: string }>;
       text_render_failed?: Array<{ text: string; reason: string }>;
       image_add_failed?: Array<{ path: string; reason: string }>;
@@ -45,7 +45,7 @@ interface ExportTasksState {
   removeTask: (id: string) => void;
   clearCompleted: () => void;
   pollTask: (id: string, projectId: string, taskId: string) => Promise<void>;
-  restoreActiveTasks: () => void; // 恢复正在进行的任务并重新开始轮询
+  restoreActiveTasks: () => void; // Restore ongoing tasks and restart polling
 }
 
 export const useExportTasksStore = create<ExportTasksState>()(
@@ -146,7 +146,7 @@ export const useExportTasksStore = create<ExportTasksState>()(
               updates.completedAt = new Date().toISOString();
               get().updateTask(id, updates);
             } else if (task.status === 'FAILED') {
-              updates.errorMessage = task.error_message || task.error || '导出失败';
+              updates.errorMessage = task.error_message || task.error || 'Export failed';
               updates.completedAt = new Date().toISOString();
               get().updateTask(id, updates);
             } else if (task.status === 'PENDING' || task.status === 'RUNNING' || task.status === 'PROCESSING') {
@@ -158,7 +158,7 @@ export const useExportTasksStore = create<ExportTasksState>()(
             console.error('[ExportTasksStore] Poll error:', error);
             get().updateTask(id, {
               status: 'FAILED',
-              errorMessage: error.message || '轮询失败',
+              errorMessage: error.message || 'Polling failed',
               completedAt: new Date().toISOString(),
             });
           }
@@ -168,18 +168,18 @@ export const useExportTasksStore = create<ExportTasksState>()(
       },
 
       restoreActiveTasks: () => {
-        // 恢复所有正在进行的任务并重新开始轮询
+        // Restore all ongoing tasks and restart polling
         const state = get();
         const activeTasks = state.tasks.filter(
           task => task.status === 'PENDING' || task.status === 'PROCESSING' || task.status === 'RUNNING'
         );
         
         if (activeTasks.length > 0) {
-          console.log(`[ExportTasksStore] 恢复 ${activeTasks.length} 个正在进行的任务`);
+          console.log(`[ExportTasksStore] Restoring ${activeTasks.length} ongoing tasks`);
           activeTasks.forEach(task => {
-            // 重新开始轮询
+            // Restart polling
             state.pollTask(task.id, task.projectId, task.taskId).catch(err => {
-              console.error(`[ExportTasksStore] 恢复任务 ${task.id} 失败:`, err);
+              console.error(`[ExportTasksStore] Failed to restore task ${task.id}:`, err);
             });
           });
         }

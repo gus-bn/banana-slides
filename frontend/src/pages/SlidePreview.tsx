@@ -54,7 +54,7 @@ export const SlidePreview: React.FC = () => {
   
   const { addTask, pollTask: pollExportTask, tasks: exportTasks, restoreActiveTasks } = useExportTasksStore();
 
-  // 页面挂载时恢复正在进行的导出任务（页面刷新后）
+  // Restore ongoing export tasks on mount (after page refresh)
   useEffect(() => {
     restoreActiveTasks();
   }, [restoreActiveTasks]);
@@ -65,7 +65,7 @@ export const SlidePreview: React.FC = () => {
   const [editPrompt, setEditPrompt] = useState('');
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [showExportTasksPanel, setShowExportTasksPanel] = useState(false);
-  // 多选导出相关状态
+  // Multi-select export related states
   const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
   const [selectedPageIds, setSelectedPageIds] = useState<Set<string>>(new Set());
   const [isOutlineExpanded, setIsOutlineExpanded] = useState(false);
@@ -87,18 +87,18 @@ export const SlidePreview: React.FC = () => {
   });
   const [extraRequirements, setExtraRequirements] = useState<string>('');
   const [isSavingRequirements, setIsSavingRequirements] = useState(false);
-  const isEditingRequirements = useRef(false); // 跟踪用户是否正在编辑额外要求
+  const isEditingRequirements = useRef(false); // Track if user is editing extra requirements
   const [templateStyle, setTemplateStyle] = useState<string>('');
   const [isSavingTemplateStyle, setIsSavingTemplateStyle] = useState(false);
-  const isEditingTemplateStyle = useRef(false); // 跟踪用户是否正在编辑风格描述
-  const lastProjectId = useRef<string | null>(null); // 跟踪上一次的项目ID
+  const isEditingTemplateStyle = useRef(false); // Track if user is editing style description
+  const lastProjectId = useRef<string | null>(null); // Track last project ID
   const [isProjectSettingsOpen, setIsProjectSettingsOpen] = useState(false);
-  // 素材生成模态开关（模块本身可复用，这里只是示例入口）
+  // Material generator modal switch (reusable module, just entry here)
   const [isMaterialModalOpen, setIsMaterialModalOpen] = useState(false);
-  // 素材选择器模态开关
+  // Material selector modal switch
   const [userTemplates, setUserTemplates] = useState<UserTemplate[]>([]);
   const [isMaterialSelectorOpen, setIsMaterialSelectorOpen] = useState(false);
-  // 导出设置
+  // Export settings
   const [exportExtractorMethod, setExportExtractorMethod] = useState<ExportExtractorMethod>(
     (currentProject?.export_extractor_method as ExportExtractorMethod) || 'hybrid'
   );
@@ -106,7 +106,7 @@ export const SlidePreview: React.FC = () => {
     (currentProject?.export_inpaint_method as ExportInpaintMethod) || 'hybrid'
   );
   const [isSavingExportSettings, setIsSavingExportSettings] = useState(false);
-  // 每页编辑参数缓存（前端会话内缓存，便于重复执行）
+  // Per-page edit parameters cache (cached in session, for easy re-execution)
   const [editContextByPage, setEditContextByPage] = useState<Record<string, {
     prompt: string;
     contextImages: {
@@ -116,7 +116,7 @@ export const SlidePreview: React.FC = () => {
     };
   }>>({});
 
-  // 预览图矩形选择状态（编辑弹窗内）
+  // Preview image rectangle selection state (inside edit modal)
   const imageRef = useRef<HTMLImageElement | null>(null);
   const [isRegionSelectionMode, setIsRegionSelectionMode] = useState(false);
   const [isSelectingRegion, setIsSelectingRegion] = useState(false);
@@ -130,14 +130,14 @@ export const SlidePreview: React.FC = () => {
     return currentProject?.pages.filter(p => p.id && p.generated_image_path) || [];
   }, [currentProject?.pages]);
 
-  // 加载项目数据 & 用户模板
+  // Load project data & user templates
   useEffect(() => {
     if (projectId && (!currentProject || currentProject.id !== projectId)) {
-      // 直接使用 projectId 同步项目数据
+      // Directly use projectId to sync project data
       syncProject(projectId);
     }
     
-    // 加载用户模板列表（用于按需获取File）
+    // Load user template list (for on-demand File retrieval)
     const loadTemplates = async () => {
       try {
         const response = await listUserTemplates();
@@ -145,31 +145,31 @@ export const SlidePreview: React.FC = () => {
           setUserTemplates(response.data.templates);
         }
       } catch (error) {
-        console.error('加载用户模板失败:', error);
+        console.error('Failed to load user templates:', error);
       }
     };
     loadTemplates();
   }, [projectId, currentProject, syncProject]);
 
-  // 当项目加载后，初始化额外要求和风格描述
-  // 只在项目首次加载或项目ID变化时初始化，避免覆盖用户正在输入的内容
+  // After project load, initialize extra requirements and template style
+  // Only initialize on first load or when projectId changes to avoid overwriting user input
   useEffect(() => {
     if (currentProject) {
-      // 检查是否是新项目
+      // Check if it's a new project
       const isNewProject = lastProjectId.current !== currentProject.id;
       
       if (isNewProject) {
-        // 新项目，初始化额外要求和风格描述
+        // New project, initialize extra requirements and style description
         setExtraRequirements(currentProject.extra_requirements || '');
         setTemplateStyle(currentProject.template_style || '');
-        // 初始化导出设置
+        // Initialize export settings
         setExportExtractorMethod((currentProject.export_extractor_method as ExportExtractorMethod) || 'hybrid');
         setExportInpaintMethod((currentProject.export_inpaint_method as ExportInpaintMethod) || 'hybrid');
         lastProjectId.current = currentProject.id || null;
         isEditingRequirements.current = false;
         isEditingTemplateStyle.current = false;
       } else {
-        // 同一项目且用户未在编辑，可以更新（比如从服务器保存后同步回来）
+        // Same project and user is not editing, can update (e.g. sync back from server)
         if (!isEditingRequirements.current) {
           setExtraRequirements(currentProject.extra_requirements || '');
         }
@@ -177,11 +177,11 @@ export const SlidePreview: React.FC = () => {
           setTemplateStyle(currentProject.template_style || '');
         }
       }
-      // 如果用户正在编辑，则不更新本地状态
+      // If user is editing, do not update local state
     }
   }, [currentProject?.id, currentProject?.extra_requirements, currentProject?.template_style]);
 
-  // 加载当前页面的历史版本
+  // Load history versions for current page
   useEffect(() => {
     const loadVersions = async () => {
       if (!currentProject || !projectId || selectedIndex < 0 || selectedIndex >= currentProject.pages.length) {
@@ -227,12 +227,12 @@ export const SlidePreview: React.FC = () => {
     
     if (hasImages) {
       const message = isPartialGenerate
-        ? `将重新生成选中的 ${selectedPageIds.size} 页（历史记录将会保存），确定继续吗？`
-        : '将重新生成所有页面（历史记录将会保存），确定继续吗？';
+        ? `Will regenerate the selected ${selectedPageIds.size} pages (history will be saved). Continue?`
+        : 'Will regenerate all pages (history will be saved). Continue?';
       confirm(
         message,
         executeGenerate,
-        { title: '确认重新生成', variant: 'warning' }
+        { title: 'Confirm Regenerate', variant: 'warning' }
       );
     } else {
       await executeGenerate();
@@ -244,19 +244,19 @@ export const SlidePreview: React.FC = () => {
     const page = currentProject.pages[selectedIndex];
     if (!page.id) return;
     
-    // 如果该页面正在生成，不重复提交
+    // If the page is already generating, do not resubmit
     if (pageGeneratingTasks[page.id]) {
-      show({ message: '该页面正在生成中，请稍候...', type: 'info' });
+      show({ message: 'This page is generating, please wait...', type: 'info' });
       return;
     }
     
     try {
-      // 使用统一的 generateImages，传入单个页面 ID
+      // Use unified generateImages, passing a single page ID
       await generateImages([page.id]);
-      show({ message: '已开始生成图片，请稍候...', type: 'success' });
+      show({ message: 'Started generating image, please wait...', type: 'success' });
     } catch (error: any) {
-      // 提取后端返回的更具体错误信息
-      let errorMessage = '生成失败';
+      // Extract more specific error message from backend
+      let errorMessage = 'Generation failed';
       const respData = error?.response?.data;
 
       if (respData) {
@@ -291,10 +291,10 @@ export const SlidePreview: React.FC = () => {
       await setCurrentImageVersion(projectId, selectedPage.id, versionId);
       await syncProject(projectId);
       setShowVersionMenu(false);
-      show({ message: '已切换到该版本', type: 'success' });
+      show({ message: 'Switched to this version', type: 'success' });
     } catch (error: any) {
       show({ 
-        message: `切换失败: ${error.message || '未知错误'}`, 
+        message: `Switch failed: ${error.message || 'Unknown error'}`, 
         type: 'error' 
       });
     }
@@ -426,11 +426,11 @@ export const SlidePreview: React.FC = () => {
         ...prev,
         uploadedFiles: [...prev.uploadedFiles, ...files],
       }));
-      show({ message: `已添加 ${materials.length} 个素材`, type: 'success' });
+      show({ message: `Added ${materials.length} materials`, type: 'success' });
     } catch (error: any) {
-      console.error('加载素材失败:', error);
+      console.error('Failed to load materials:', error);
       show({
-        message: '加载素材失败: ' + (error.message || '未知错误'),
+        message: 'Failed to load materials: ' + (error.message || 'Unknown error'),
         type: 'error',
       });
     }
@@ -547,25 +547,25 @@ export const SlidePreview: React.FC = () => {
             ...prev,
             uploadedFiles: [...prev.uploadedFiles, file],
           }));
-          // 给用户一个明显反馈：选区已作为图片加入下方“上传图片”
+          // Give user feedback: Selection added as reference image
           show({
-            message: '已将选中区域添加为参考图片，可在下方“上传图片”中查看与删除',
+            message: 'Selected region added as reference image, check/remove in "Upload Images" below',
             type: 'success',
           });
         }, 'image/png');
       } catch (e: any) {
-        console.error('裁剪选中区域失败（可能是跨域图片导致 canvas 被污染）:', e);
+        console.error('Failed to crop selection (possibly cross-origin image tainting canvas):', e);
         show({
-          message: '无法从当前图片裁剪区域（浏览器安全限制）。可以尝试手动上传参考图片。',
+          message: 'Cannot crop region from current image (browser security restriction). Try uploading reference image manually.',
           type: 'error',
         });
       }
     } finally {
-      // 不清理 selectionRect，让选区在界面上持续显示
+      // Do not clear selectionRect, let selection stay visible
     }
   };
 
-  // 多选相关函数
+  // Multi-select related functions
   const togglePageSelection = (pageId: string) => {
     setSelectedPageIds(prev => {
       const next = new Set(prev);
@@ -590,17 +590,17 @@ export const SlidePreview: React.FC = () => {
   const toggleMultiSelectMode = () => {
     setIsMultiSelectMode(prev => {
       if (prev) {
-        // 退出多选模式时清空选择
+        // Clear selection when exiting multi-select mode
         setSelectedPageIds(new Set());
       }
       return !prev;
     });
   };
 
-  // 获取有图片的选中页面ID列表
+  // Get selected page IDs for export
   const getSelectedPageIdsForExport = (): string[] | undefined => {
     if (!isMultiSelectMode || selectedPageIds.size === 0) {
-      return undefined; // 导出全部
+      return undefined; // Export all
     }
     return Array.from(selectedPageIds);
   };
@@ -642,7 +642,7 @@ export const SlidePreview: React.FC = () => {
           pageIds: pageIds,
         });
         
-        show({ message: '导出任务已开始，可在导出任务面板查看进度', type: 'success' });
+        show({ message: 'Export task started, check progress in Export Tasks panel', type: 'success' });
         
         const response = await apiExportEditablePPTX(projectId, undefined, pageIds);
         const taskId = response.data?.task_id;
@@ -670,27 +670,27 @@ export const SlidePreview: React.FC = () => {
         projectId,
         type: type as ExportTaskType,
         status: 'FAILED',
-        errorMessage: normalizeErrorMessage(error.message || '导出失败'),
+        errorMessage: normalizeErrorMessage(error.message || 'Export failed'),
         pageIds: pageIds,
       });
-      show({ message: normalizeErrorMessage(error.message || '导出失败'), type: 'error' });
+      show({ message: normalizeErrorMessage(error.message || 'Export failed'), type: 'error' });
     }
   };
 
   const handleRefresh = useCallback(async () => {
     const targetProjectId = projectId || currentProject?.id;
     if (!targetProjectId) {
-      show({ message: '无法刷新：缺少项目ID', type: 'error' });
+      show({ message: 'Refresh failed: Missing project ID', type: 'error' });
       return;
     }
 
     setIsRefreshing(true);
     try {
       await syncProject(targetProjectId);
-      show({ message: '刷新成功', type: 'success' });
+      show({ message: 'Refresh successful', type: 'success' });
     } catch (error: any) {
       show({ 
-        message: error.message || '刷新失败，请稍后重试', 
+        message: error.message || 'Refresh failed, please try again later', 
         type: 'error' 
       });
     } finally {
@@ -704,14 +704,14 @@ export const SlidePreview: React.FC = () => {
     setIsSavingRequirements(true);
     try {
       await updateProject(projectId, { extra_requirements: extraRequirements || '' });
-      // 保存成功后，标记为不在编辑状态，允许同步更新
+      // After successful save, mark as not editing to allow sync update
       isEditingRequirements.current = false;
-      // 更新本地项目状态
+      // Update local project state
       await syncProject(projectId);
-      show({ message: '额外要求已保存', type: 'success' });
+      show({ message: 'Extra requirements saved', type: 'success' });
     } catch (error: any) {
       show({ 
-        message: `保存失败: ${error.message || '未知错误'}`, 
+        message: `Save failed: ${error.message || 'Unknown error'}`, 
         type: 'error' 
       });
     } finally {
@@ -725,14 +725,14 @@ export const SlidePreview: React.FC = () => {
     setIsSavingTemplateStyle(true);
     try {
       await updateProject(projectId, { template_style: templateStyle || '' });
-      // 保存成功后，标记为不在编辑状态，允许同步更新
+      // After successful save, mark as not editing to allow sync update
       isEditingTemplateStyle.current = false;
-      // 更新本地项目状态
+      // Update local project state
       await syncProject(projectId);
-      show({ message: '风格描述已保存', type: 'success' });
+      show({ message: 'Style description saved', type: 'success' });
     } catch (error: any) {
       show({ 
-        message: `保存失败: ${error.message || '未知错误'}`, 
+        message: `Save failed: ${error.message || 'Unknown error'}`, 
         type: 'error' 
       });
     } finally {
@@ -749,12 +749,12 @@ export const SlidePreview: React.FC = () => {
         export_extractor_method: exportExtractorMethod,
         export_inpaint_method: exportInpaintMethod 
       });
-      // 更新本地项目状态
+      // Update local project state
       await syncProject(projectId);
-      show({ message: '导出设置已保存', type: 'success' });
+      show({ message: 'Export settings saved', type: 'success' });
     } catch (error: any) {
       show({ 
-        message: `保存失败: ${error.message || '未知错误'}`, 
+        message: `Save failed: ${error.message || 'Unknown error'}`, 
         type: 'error' 
       });
     } finally {
@@ -765,18 +765,18 @@ export const SlidePreview: React.FC = () => {
   const handleTemplateSelect = async (templateFile: File | null, templateId?: string) => {
     if (!projectId) return;
     
-    // 如果有templateId，按需加载File
+    // If templateId provided, load File on demand
     let file = templateFile;
     if (templateId && !file) {
       file = await getTemplateFile(templateId, userTemplates);
       if (!file) {
-        show({ message: '加载模板失败', type: 'error' });
+        show({ message: 'Failed to load template', type: 'error' });
         return;
       }
     }
     
     if (!file) {
-      // 如果没有文件也没有 ID，可能是取消选择
+      // If no file and no ID, likely cancelled
       return;
     }
     
@@ -785,11 +785,11 @@ export const SlidePreview: React.FC = () => {
       await uploadTemplate(projectId, file);
       await syncProject(projectId);
       setIsTemplateModalOpen(false);
-      show({ message: '模板更换成功', type: 'success' });
+      show({ message: 'Template changed successfully', type: 'success' });
       
-      // 更新选择状态
+      // Update selection state
       if (templateId) {
-        // 判断是用户模板还是预设模板（短ID通常是预设模板）
+        // Determine if user template or preset template (short ID usually preset)
         if (templateId.length <= 3 && /^\d+$/.test(templateId)) {
           setSelectedPresetTemplateId(templateId);
           setSelectedTemplateId(null);
@@ -800,7 +800,7 @@ export const SlidePreview: React.FC = () => {
       }
     } catch (error: any) {
       show({ 
-        message: `更换模板失败: ${error.message || '未知错误'}`, 
+        message: `Failed to change template: ${error.message || 'Unknown error'}`, 
         type: 'error' 
       });
     } finally {
@@ -809,26 +809,26 @@ export const SlidePreview: React.FC = () => {
   };
 
   if (!currentProject) {
-    return <Loading fullscreen message="加载项目中..." />;
+    return <Loading fullscreen message="Loading project..." />;
   }
 
   if (isGlobalLoading) {
-    // 根据任务进度显示不同的消息
-    let loadingMessage = "处理中...";
+    // Show different messages based on task progress
+    let loadingMessage = "Processing...";
     if (taskProgress && typeof taskProgress === 'object') {
       const progressData = taskProgress as any;
       if (progressData.current_step) {
-        // 使用后端提供的当前步骤信息
+        // Use current step info from backend
         const stepMap: Record<string, string> = {
-          'Generating clean backgrounds': '正在生成干净背景...',
-          'Creating PDF': '正在创建PDF...',
-          'Parsing with MinerU': '正在解析内容...',
-          'Creating editable PPTX': '正在创建可编辑PPTX...',
-          'Complete': '完成！'
+          'Generating clean backgrounds': 'Generating clean backgrounds...',
+          'Creating PDF': 'Creating PDF...',
+          'Parsing with MinerU': 'Parsing content...',
+          'Creating editable PPTX': 'Creating editable PPTX...',
+          'Complete': 'Complete!'
         };
         loadingMessage = stepMap[progressData.current_step] || progressData.current_step;
       }
-      // 不再显示 "处理中 (X/Y)..." 格式，百分比已在进度条显示
+      // No longer show "Processing (X/Y)..." format, percentage is shown in progress bar
     }
     
     return (
@@ -851,7 +851,7 @@ export const SlidePreview: React.FC = () => {
 
   return (
     <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
-      {/* 顶栏 */}
+      {/* Header */}
       <header className="h-14 md:h-16 bg-white shadow-sm border-b border-gray-200 flex items-center justify-between px-3 md:px-6 flex-shrink-0">
         <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-1">
           <Button
@@ -861,7 +861,7 @@ export const SlidePreview: React.FC = () => {
             onClick={() => navigate('/')}
             className="hidden sm:inline-flex flex-shrink-0"
           >
-            <span className="hidden md:inline">主页</span>
+            <span className="hidden md:inline">Home</span>
           </Button>
           <Button
             variant="ghost"
@@ -876,14 +876,14 @@ export const SlidePreview: React.FC = () => {
             }}
             className="flex-shrink-0"
           >
-            <span className="hidden sm:inline">返回</span>
+            <span className="hidden sm:inline">Back</span>
           </Button>
           <div className="flex items-center gap-1.5 md:gap-2 min-w-0">
             <span className="text-xl md:text-2xl">🍌</span>
-            <span className="text-base md:text-xl font-bold truncate">蕉幻</span>
+            <span className="text-base md:text-xl font-bold truncate">Banana Slides</span>
           </div>
           <span className="text-gray-400 hidden md:inline">|</span>
-          <span className="text-sm md:text-lg font-semibold truncate hidden sm:inline">预览</span>
+          <span className="text-sm md:text-lg font-semibold truncate hidden sm:inline">Preview</span>
         </div>
         <div className="flex items-center gap-1 md:gap-3 flex-shrink-0">
           <Button
@@ -893,7 +893,7 @@ export const SlidePreview: React.FC = () => {
             onClick={() => setIsProjectSettingsOpen(true)}
             className="hidden lg:inline-flex"
           >
-            <span className="hidden xl:inline">项目设置</span>
+            <span className="hidden xl:inline">Project Settings</span>
           </Button>
           <Button
             variant="ghost"
@@ -902,7 +902,7 @@ export const SlidePreview: React.FC = () => {
             onClick={() => setIsTemplateModalOpen(true)}
             className="hidden lg:inline-flex"
           >
-            <span className="hidden xl:inline">更换模板</span>
+            <span className="hidden xl:inline">Change Template</span>
           </Button>
           <Button
             variant="ghost"
@@ -911,7 +911,7 @@ export const SlidePreview: React.FC = () => {
             onClick={() => setIsMaterialModalOpen(true)}
             className="hidden lg:inline-flex"
           >
-            <span className="hidden xl:inline">素材生成</span>
+            <span className="hidden xl:inline">Material Generation</span>
           </Button>
           <Button
             variant="secondary"
@@ -920,7 +920,7 @@ export const SlidePreview: React.FC = () => {
             onClick={() => navigate(`/project/${projectId}/detail`)}
             className="hidden sm:inline-flex"
           >
-            <span className="hidden md:inline">上一步</span>
+            <span className="hidden md:inline">Previous</span>
           </Button>
           <Button
             variant="ghost"
@@ -930,10 +930,10 @@ export const SlidePreview: React.FC = () => {
             disabled={isRefreshing}
             className="hidden md:inline-flex"
           >
-            <span className="hidden lg:inline">刷新</span>
+            <span className="hidden lg:inline">Refresh</span>
           </Button>
           
-          {/* 导出任务按钮 */}
+          {/* Export Task Button */}
           {exportTasks.filter(t => t.projectId === projectId).length > 0 && (
             <div className="relative">
               <Button
@@ -980,39 +980,39 @@ export const SlidePreview: React.FC = () => {
             >
               <span className="hidden sm:inline">
                 {isMultiSelectMode && selectedPageIds.size > 0 
-                  ? `导出 (${selectedPageIds.size})` 
-                  : '导出'}
+                  ? `Export (${selectedPageIds.size})` 
+                  : 'Export'}
               </span>
               <span className="sm:hidden">
                 {isMultiSelectMode && selectedPageIds.size > 0 
                   ? `(${selectedPageIds.size})` 
-                  : '导出'}
+                  : 'Export'}
               </span>
             </Button>
             {showExportMenu && (
               <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-10">
                 {isMultiSelectMode && selectedPageIds.size > 0 && (
                   <div className="px-4 py-2 text-xs text-gray-500 border-b border-gray-100">
-                    将导出选中的 {selectedPageIds.size} 页
+                    Exporting {selectedPageIds.size} selected pages
                   </div>
                 )}
                 <button
                   onClick={() => handleExport('pptx')}
                   className="w-full px-4 py-2 text-left hover:bg-gray-50 transition-colors text-sm"
                 >
-                  导出为 PPTX
+                  Export as PPTX
                 </button>
                 <button
                   onClick={() => handleExport('editable-pptx')}
                   className="w-full px-4 py-2 text-left hover:bg-gray-50 transition-colors text-sm"
                 >
-                  导出可编辑 PPTX（Beta）
+                  Export Editable PPTX (Beta)
                 </button>
                 <button
                   onClick={() => handleExport('pdf')}
                   className="w-full px-4 py-2 text-left hover:bg-gray-50 transition-colors text-sm"
                 >
-                  导出为 PDF
+                  Export as PDF
                 </button>
               </div>
             )}
@@ -1033,14 +1033,14 @@ export const SlidePreview: React.FC = () => {
               disabled={isMultiSelectMode && selectedPageIds.size === 0}
             >
               {isMultiSelectMode && selectedPageIds.size > 0
-                ? `生成选中页面 (${selectedPageIds.size})`
-                : `批量生成图片 (${currentProject.pages.length})`}
+                ? `Generate selected (${selectedPageIds.size})`
+                : `Batch generate images (${currentProject.pages.length})`}
             </Button>
           </div>
           
-          {/* 缩略图列表：桌面端垂直，移动端横向滚动 */}
+          {/* Thumbnail list: vertical on desktop, horizontal scroll on mobile */}
           <div className="flex-1 overflow-y-auto md:overflow-y-auto overflow-x-auto md:overflow-x-visible p-3 md:p-4 min-h-0">
-            {/* 多选模式切换 - 紧凑布局 */}
+            {/* Multi-select mode toggle - compact layout */}
             <div className="flex items-center gap-2 text-xs mb-3">
               <button
                 onClick={toggleMultiSelectMode}
@@ -1051,7 +1051,7 @@ export const SlidePreview: React.FC = () => {
                 }`}
               >
                 {isMultiSelectMode ? <CheckSquare size={14} /> : <Square size={14} />}
-                <span>{isMultiSelectMode ? '取消多选' : '多选'}</span>
+                <span>{isMultiSelectMode ? 'Cancel multi-select' : 'Multi-select'}</span>
               </button>
               {isMultiSelectMode && (
                 <>
@@ -1059,11 +1059,11 @@ export const SlidePreview: React.FC = () => {
                     onClick={selectedPageIds.size === pagesWithImages.length ? deselectAllPages : selectAllPages}
                     className="text-gray-500 hover:text-banana-600 transition-colors"
                   >
-                    {selectedPageIds.size === pagesWithImages.length ? '取消全选' : '全选'}
+                    {selectedPageIds.size === pagesWithImages.length ? 'Unselect all' : 'Select all'}
                   </button>
                   {selectedPageIds.size > 0 && (
                     <span className="text-banana-600 font-medium">
-                      ({selectedPageIds.size}页)
+                      ({selectedPageIds.size} pages)
                     </span>
                   )}
                 </>
@@ -1160,24 +1160,24 @@ export const SlidePreview: React.FC = () => {
           </div>
         </aside>
 
-        {/* 右侧：大图预览 */}
+        {/* Right side: large image preview */}
         <main className="flex-1 flex flex-col bg-gradient-to-br from-banana-50 via-white to-gray-50 min-w-0 overflow-hidden">
           {currentProject.pages.length === 0 ? (
             <div className="flex-1 flex items-center justify-center overflow-y-auto">
               <div className="text-center">
                 <div className="text-4xl md:text-6xl mb-4">📊</div>
                 <h3 className="text-lg md:text-xl font-semibold text-gray-700 mb-2">
-                  还没有页面
+                  No pages yet
                 </h3>
                 <p className="text-sm md:text-base text-gray-500 mb-6">
-                  请先返回编辑页面添加内容
+                  Please return to editor to add content
                 </p>
                 <Button
                   variant="primary"
                   onClick={() => navigate(`/project/${projectId}/outline`)}
                   className="text-sm md:text-base"
                 >
-                  返回编辑
+                  Return to Edit
                 </Button>
               </div>
             </div>
@@ -1200,10 +1200,10 @@ export const SlidePreview: React.FC = () => {
                           <div className="text-6xl mb-4">🍌</div>
                           <p className="text-gray-500 mb-4">
                             {selectedPage?.id && pageGeneratingTasks[selectedPage.id]
-                              ? '正在生成中...'
+                              ? 'Generating...'
                               : selectedPage?.status === 'GENERATING'
-                              ? '正在生成中...'
-                              : '尚未生成图片'}
+                              ? 'Generating...'
+                              : 'Image not generated yet'}
                           </p>
                           {(!selectedPage?.id || !pageGeneratingTasks[selectedPage.id]) && 
                            selectedPage?.status !== 'GENERATING' && (
@@ -1211,7 +1211,7 @@ export const SlidePreview: React.FC = () => {
                               variant="primary"
                               onClick={handleRegeneratePage}
                             >
-                              生成此页
+                              Generate this page
                             </Button>
                           )}
                         </div>
@@ -1224,7 +1224,7 @@ export const SlidePreview: React.FC = () => {
               {/* 控制栏 */}
               <div className="bg-white border-t border-gray-200 px-3 md:px-6 py-3 md:py-4 flex-shrink-0">
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-3 max-w-5xl mx-auto">
-                  {/* 导航 */}
+                  {/* Navigation */}
                   <div className="flex items-center gap-2 w-full sm:w-auto justify-center">
                     <Button
                       variant="ghost"
@@ -1234,8 +1234,8 @@ export const SlidePreview: React.FC = () => {
                       disabled={selectedIndex === 0}
                       className="text-xs md:text-sm"
                     >
-                      <span className="hidden sm:inline">上一页</span>
-                      <span className="sm:hidden">上一页</span>
+                      <span className="hidden sm:inline">Previous page</span>
+                      <span className="sm:hidden">Prev</span>
                     </Button>
                     <span className="px-2 md:px-4 text-xs md:text-sm text-gray-600 whitespace-nowrap">
                       {selectedIndex + 1} / {currentProject.pages.length}
@@ -1252,32 +1252,32 @@ export const SlidePreview: React.FC = () => {
                       disabled={selectedIndex === currentProject.pages.length - 1}
                       className="text-xs md:text-sm"
                     >
-                      <span className="hidden sm:inline">下一页</span>
-                      <span className="sm:hidden">下一页</span>
+                      <span className="hidden sm:inline">Next page</span>
+                      <span className="sm:hidden">Next</span>
                     </Button>
                   </div>
 
-                  {/* 操作 */}
+                  {/* Actions */}
                   <div className="flex items-center gap-1.5 md:gap-2 w-full sm:w-auto justify-center">
-                    {/* 手机端：模板更换按钮 */}
+                    {/* Mobile: template change button */}
                     <Button
                       variant="ghost"
                       size="sm"
                       icon={<Upload size={16} />}
                       onClick={() => setIsTemplateModalOpen(true)}
                       className="lg:hidden text-xs"
-                      title="更换模板"
+                      title="Change template"
                     />
-                    {/* 手机端：素材生成按钮 */}
+                    {/* Mobile: material generation button */}
                     <Button
                       variant="ghost"
                       size="sm"
                       icon={<ImagePlus size={16} />}
                       onClick={() => setIsMaterialModalOpen(true)}
                       className="lg:hidden text-xs"
-                      title="素材生成"
+                      title="Material generation"
                     />
-                    {/* 手机端：刷新按钮 */}
+                    {/* Mobile: refresh button */}
                     <Button
                       variant="ghost"
                       size="sm"
@@ -1285,7 +1285,7 @@ export const SlidePreview: React.FC = () => {
                       onClick={handleRefresh}
                       disabled={isRefreshing}
                       className="md:hidden text-xs"
-                      title="刷新"
+                      title="Refresh"
                     />
                     {imageVersions.length > 1 && (
                       <div className="relative">
@@ -1295,8 +1295,8 @@ export const SlidePreview: React.FC = () => {
                           onClick={() => setShowVersionMenu(!showVersionMenu)}
                           className="text-xs md:text-sm"
                         >
-                          <span className="hidden md:inline">历史版本 ({imageVersions.length})</span>
-                          <span className="md:hidden">版本</span>
+                          <span className="hidden md:inline">History versions ({imageVersions.length})</span>
+                          <span className="md:hidden">Versions</span>
                         </Button>
                         {showVersionMenu && (
                           <div className="absolute right-0 bottom-full mb-2 w-56 md:w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-20 max-h-96 overflow-y-auto">
@@ -1310,17 +1310,17 @@ export const SlidePreview: React.FC = () => {
                               >
                                 <div className="flex items-center gap-2">
                                   <span>
-                                    版本 {version.version_number}
+                                    Version {version.version_number}
                                   </span>
                                   {version.is_current && (
                                     <span className="text-xs text-banana-600 font-medium">
-                                      (当前)
+                                      (Current)
                                     </span>
                                   )}
                                 </div>
                                 <span className="text-xs text-gray-400 hidden md:inline">
                                   {version.created_at
-                                    ? new Date(version.created_at).toLocaleString('zh-CN', {
+                                    ? new Date(version.created_at).toLocaleString('en-US', {
                                         month: 'short',
                                         day: 'numeric',
                                         hour: '2-digit',
@@ -1341,7 +1341,7 @@ export const SlidePreview: React.FC = () => {
                       disabled={!selectedPage?.generated_image_path}
                       className="text-xs md:text-sm flex-1 sm:flex-initial"
                     >
-                      编辑
+                      Edit
                     </Button>
                     <Button
                       variant="ghost"
@@ -1351,8 +1351,8 @@ export const SlidePreview: React.FC = () => {
                       className="text-xs md:text-sm flex-1 sm:flex-initial"
                     >
                       {selectedPage?.id && pageGeneratingTasks[selectedPage.id]
-                        ? '生成中...'
-                        : '重新生成'}
+                        ? 'Generating...'
+                        : 'Regenerate'}
                     </Button>
                   </div>
                 </div>
@@ -1362,15 +1362,15 @@ export const SlidePreview: React.FC = () => {
         </main>
       </div>
 
-      {/* 编辑对话框 */}
+      {/* Edit Modal */}
       <Modal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
-        title="编辑页面"
+        title="Edit Page"
         size="lg"
       >
         <div className="space-y-4">
-          {/* 图片（支持矩形区域选择） */}
+          {/* Image (Supports rectangle region selection) */}
           <div
             className="aspect-video bg-gray-100 rounded-lg overflow-hidden relative"
             onMouseDown={handleSelectionMouseDown}
@@ -1380,14 +1380,14 @@ export const SlidePreview: React.FC = () => {
           >
             {imageUrl && (
               <>
-                {/* 左上角：区域选图模式开关 */}
+                {/* Top left: Region selection mode switch */}
                 <button
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    // 切换矩形选择模式
+                    // Toggle rectangle selection mode
                     setIsRegionSelectionMode((prev) => !prev);
-                    // 切模式时清空当前选区
+                    // Clear current selection when switching modes
                     setSelectionStart(null);
                     setSelectionRect(null);
                     setIsSelectingRegion(false);
@@ -1395,7 +1395,7 @@ export const SlidePreview: React.FC = () => {
                   className="absolute top-2 left-2 z-10 px-2 py-1 rounded bg-white/80 text-[10px] text-gray-700 hover:bg-banana-50 shadow-sm flex items-center gap-1"
                 >
                   <Sparkles size={12} />
-                  <span>{isRegionSelectionMode ? '结束区域选图' : '区域选图'}</span>
+                  <span>{isRegionSelectionMode ? 'End region selection' : 'Region selection'}</span>
                 </button>
 
                 <img
@@ -1421,14 +1421,14 @@ export const SlidePreview: React.FC = () => {
             )}
           </div>
 
-          {/* 大纲内容 - 可折叠 */}
+          {/* Outline content - collapsible */}
           {selectedPage?.outline_content && (
             <div className="bg-gray-50 rounded-lg border border-gray-200">
               <button
                 onClick={() => setIsOutlineExpanded(!isOutlineExpanded)}
                 className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-100 transition-colors"
               >
-                <h4 className="text-sm font-semibold text-gray-700">页面大纲</h4>
+                <h4 className="text-sm font-semibold text-gray-700">Page Outline</h4>
                 {isOutlineExpanded ? (
                   <ChevronUp size={18} className="text-gray-500" />
                 ) : (
@@ -1450,14 +1450,14 @@ export const SlidePreview: React.FC = () => {
             </div>
           )}
 
-          {/* 描述内容 - 可折叠 */}
+          {/* Description content - collapsible */}
           {selectedPage?.description_content && (
             <div className="bg-blue-50 rounded-lg border border-blue-200">
               <button
                 onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
                 className="w-full px-4 py-3 flex items-center justify-between hover:bg-blue-100 transition-colors"
               >
-                <h4 className="text-sm font-semibold text-gray-700">页面描述</h4>
+                <h4 className="text-sm font-semibold text-gray-700">Page Description</h4>
                 {isDescriptionExpanded ? (
                   <ChevronUp size={18} className="text-gray-500" />
                 ) : (
@@ -1470,14 +1470,14 @@ export const SlidePreview: React.FC = () => {
                     <Markdown>
                       {(() => {
                         const desc = selectedPage.description_content;
-                        if (!desc) return '暂无描述';
-                        // 处理两种格式
+                        if (!desc) return 'No description';
+                        // Handle both formats
                         if ('text' in desc) {
                           return desc.text;
                         } else if ('text_content' in desc && Array.isArray(desc.text_content)) {
                           return desc.text_content.join('\n');
                         }
-                        return '暂无描述';
+                        return 'No description';
                       })() as string}
                     </Markdown>
                   </div>
@@ -1486,11 +1486,11 @@ export const SlidePreview: React.FC = () => {
             </div>
           )}
 
-          {/* 上下文图片选择 */}
+          {/* Context image selection */}
           <div className="bg-gray-50 rounded-lg border border-gray-200 p-4 space-y-4">
-            <h4 className="text-sm font-semibold text-gray-700 mb-3">选择上下文图片（可选）</h4>
+            <h4 className="text-sm font-semibold text-gray-700 mb-3">Select context images (optional)</h4>
             
-            {/* Template图片选择 */}
+            {/* Template image selection */}
             {currentProject?.template_image_path && (
               <div className="flex items-center gap-3">
                 <input
@@ -1507,7 +1507,7 @@ export const SlidePreview: React.FC = () => {
                 />
                 <label htmlFor="use-template" className="flex items-center gap-2 cursor-pointer">
                   <ImageIcon size={16} className="text-gray-500" />
-                  <span className="text-sm text-gray-700">使用模板图片</span>
+                  <span className="text-sm text-gray-700">Use template image</span>
                   {currentProject.template_image_path && (
                     <img
                       src={getImageUrl(currentProject.template_image_path, currentProject.updated_at)}
@@ -1519,12 +1519,12 @@ export const SlidePreview: React.FC = () => {
               </div>
             )}
 
-            {/* Desc中的图片 */}
+            {/* Images in Desc */}
             {selectedPage?.description_content && (() => {
               const descImageUrls = extractImageUrlsFromDescription(selectedPage.description_content);
               return descImageUrls.length > 0 ? (
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">描述中的图片：</label>
+                  <label className="text-sm font-medium text-gray-700">Images in description:</label>
                   <div className="grid grid-cols-3 gap-2">
                     {descImageUrls.map((url, idx) => (
                       <div key={idx} className="relative group">
@@ -1563,10 +1563,10 @@ export const SlidePreview: React.FC = () => {
               ) : null;
             })()}
 
-            {/* 上传图片 */}
+            {/* Upload image */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-gray-700">上传图片：</label>
+                <label className="text-sm font-medium text-gray-700">Upload images:</label>
                 {projectId && (
                   <Button
                     variant="ghost"
@@ -1574,7 +1574,7 @@ export const SlidePreview: React.FC = () => {
                     icon={<ImagePlus size={16} />}
                     onClick={() => setIsMaterialSelectorOpen(true)}
                   >
-                    从素材库选择
+                    Select from library
                   </Button>
                 )}
               </div>
@@ -1596,7 +1596,7 @@ export const SlidePreview: React.FC = () => {
                 ))}
                 <label className="w-20 h-20 border-2 border-dashed border-gray-300 rounded flex flex-col items-center justify-center cursor-pointer hover:border-banana-500 transition-colors">
                   <Upload size={20} className="text-gray-400 mb-1" />
-                  <span className="text-xs text-gray-500">上传</span>
+                  <span className="text-xs text-gray-500">Upload</span>
                   <input
                     type="file"
                     accept="image/*"
@@ -1609,24 +1609,24 @@ export const SlidePreview: React.FC = () => {
             </div>
           </div>
 
-          {/* 编辑框 */}
+          {/* Edit prompt */}
           <Textarea
-            label="输入修改指令(将自动添加页面描述)"
-            placeholder="例如：将框选区域内的素材移除、把背景改成蓝色、增大标题字号、更改文本框样式为虚线..."
+            label="Input modification instruction (will automatically add page description)"
+            placeholder="E.g., remove materials in the selected area, change background to blue, increase title font size, change text box style to dashed..."
             value={editPrompt}
             onChange={(e) => setEditPrompt(e.target.value)}
             rows={4}
           />
           <div className="flex justify-end gap-3">
             <Button variant="ghost" onClick={() => setIsEditModalOpen(false)}>
-              取消
+              Cancel
             </Button>
             <Button
               variant="primary"
               onClick={handleSubmitEdit}
               disabled={!editPrompt.trim()}
             >
-              生成
+              Generate
             </Button>
           </div>
         </div>
@@ -1634,27 +1634,27 @@ export const SlidePreview: React.FC = () => {
       <ToastContainer />
       {ConfirmDialog}
       
-      {/* 模板选择 Modal */}
+      {/* Template Selection Modal */}
       <Modal
         isOpen={isTemplateModalOpen}
         onClose={() => setIsTemplateModalOpen(false)}
-        title="更换模板"
+        title="Change Template"
         size="lg"
       >
         <div className="space-y-4">
           <p className="text-sm text-gray-600 mb-4">
-            选择一个新的模板将应用到后续PPT页面生成（不影响已经生成的页面）。你可以选择预设模板、已有模板或上传新模板。
+            Selecting a new template will apply to future PPT page generation (does not affect pages already generated). You can choose from preset templates, existing templates, or upload a new template.
           </p>
           <TemplateSelector
             onSelect={handleTemplateSelect}
             selectedTemplateId={selectedTemplateId}
             selectedPresetTemplateId={selectedPresetTemplateId}
-            showUpload={false} // 在预览页面上传的模板直接应用到项目，不上传到用户模板库
+            showUpload={false} // Template uploaded on preview page directly applies to project, not saved to user template library
             projectId={projectId || null}
           />
           {isUploadingTemplate && (
             <div className="text-center py-2 text-sm text-gray-500">
-              正在上传模板...
+              Uploading template...
             </div>
           )}
           <div className="flex justify-end gap-3 pt-4 border-t">
@@ -1663,7 +1663,7 @@ export const SlidePreview: React.FC = () => {
               onClick={() => setIsTemplateModalOpen(false)}
               disabled={isUploadingTemplate}
             >
-              关闭
+              Close
             </Button>
           </div>
         </div>

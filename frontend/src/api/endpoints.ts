@@ -767,10 +767,10 @@ export interface OutputLanguageOption {
 }
 
 export const OUTPUT_LANGUAGE_OPTIONS: OutputLanguageOption[] = [
-  { value: 'zh', label: '中文' },
-  { value: 'ja', label: '日本語' },
+  { value: 'zh', label: 'Chinese' },
+  { value: 'ja', label: 'Japanese' },
   { value: 'en', label: 'English' },
-  { value: 'auto', label: '自动' },
+  { value: 'auto', label: 'Auto' },
 ];
 
 /**
