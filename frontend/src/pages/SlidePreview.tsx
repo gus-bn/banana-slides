@@ -215,7 +215,7 @@ export const SlidePreview: React.FC = () => {
     const pageIds = getSelectedPageIdsForExport();
     const isPartialGenerate = isMultiSelectMode && selectedPageIds.size > 0;
     
-    // 检查要生成的页面中是否有已有图片的
+    // Check if pages to be generated already have images
     const pagesToGenerate = isPartialGenerate
       ? currentProject?.pages.filter(p => p.id && selectedPageIds.has(p.id))
       : currentProject?.pages;
@@ -274,7 +274,7 @@ export const SlidePreview: React.FC = () => {
         errorMessage = error.message;
       }
 
-      // 使用统一的错误消息规范化函数
+      // Use unified error message normalization function
       errorMessage = normalizeErrorMessage(errorMessage);
 
       show({
@@ -300,11 +300,11 @@ export const SlidePreview: React.FC = () => {
     }
   };
 
-  // 从描述内容中提取图片URL
+  // Extract image URLs from description content
   const extractImageUrlsFromDescription = (descriptionContent: DescriptionContent | undefined): string[] => {
     if (!descriptionContent) return [];
     
-    // 处理两种格式
+    // Handle two formats
     let text: string = '';
     if ('text' in descriptionContent) {
       text = descriptionContent.text as string;
@@ -314,14 +314,14 @@ export const SlidePreview: React.FC = () => {
     
     if (!text) return [];
     
-    // 匹配 markdown 图片语法: ![](url) 或 ![alt](url)
+    // Match markdown image syntax: ![](url) or ![alt](url)
     const pattern = /!\[.*?\]\((.*?)\)/g;
     const matches: string[] = [];
     let match: RegExpExecArray | null;
     
     while ((match = pattern.exec(text)) !== null) {
       const url = match[1]?.trim();
-      // 只保留有效的HTTP/HTTPS URL
+      // Only keep valid HTTP/HTTPS URLs
       if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
         matches.push(url);
       }
@@ -339,7 +339,7 @@ export const SlidePreview: React.FC = () => {
     setIsDescriptionExpanded(false);
 
     if (pageId && editContextByPage[pageId]) {
-      // 恢复该页上次编辑的内容和图片选择
+      // Restore previous edit content and image selection for this page
       const cached = editContextByPage[pageId];
       setEditPrompt(cached.prompt);
       setSelectedContextImages({
@@ -348,7 +348,7 @@ export const SlidePreview: React.FC = () => {
         uploadedFiles: [...cached.contextImages.uploadedFiles],
       });
     } else {
-      // 首次编辑该页，使用默认值
+      // First edit for this page, use defaults
       setEditPrompt('');
       setSelectedContextImages({
         useTemplate: false,
@@ -357,7 +357,7 @@ export const SlidePreview: React.FC = () => {
       });
     }
 
-    // 打开编辑弹窗时，清空上一次的选区和模式
+    // Clear previous selection and mode when opening edit modal
     setIsRegionSelectionMode(false);
     setSelectionStart(null);
     setSelectionRect(null);
@@ -372,7 +372,7 @@ export const SlidePreview: React.FC = () => {
     const page = currentProject.pages[selectedIndex];
     if (!page.id) return;
 
-    // 调用后端编辑接口
+    // Call backend edit API
     await editPageImage(
       page.id,
       editPrompt,
@@ -385,7 +385,7 @@ export const SlidePreview: React.FC = () => {
       }
     );
 
-    // 缓存当前页的编辑上下文，便于后续快速重复执行
+    // Cache current page edit context for quick re-execution
     setEditContextByPage((prev) => ({
       ...prev,
       [page.id!]: {
@@ -418,7 +418,7 @@ export const SlidePreview: React.FC = () => {
 
   const handleSelectMaterials = async (materials: Material[]) => {
     try {
-      // 将选中的素材转换为File对象并添加到上传列表
+      // Convert selected materials to File objects and add to upload list
       const files = await Promise.all(
         materials.map((material) => materialUrlToFile(material))
       );
@@ -436,7 +436,7 @@ export const SlidePreview: React.FC = () => {
     }
   };
 
-  // 编辑弹窗打开时，实时把输入与图片选择写入缓存（前端会话内）
+  // When edit modal opens, write input and image selection to cache in real-time (in-session cache)
   useEffect(() => {
     if (!isEditModalOpen || !currentProject) return;
     const page = currentProject.pages[selectedIndex];
@@ -456,7 +456,7 @@ export const SlidePreview: React.FC = () => {
     }));
   }, [isEditModalOpen, currentProject, selectedIndex, editPrompt, selectedContextImages]);
 
-  // ========== 预览图矩形选择相关逻辑（编辑弹窗内） ==========
+  // ========== Preview image rectangle selection logic (inside edit modal) ==========
   const handleSelectionMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!isRegionSelectionMode || !imageRef.current) return;
     const rect = imageRef.current.getBoundingClientRect();
@@ -492,7 +492,7 @@ export const SlidePreview: React.FC = () => {
       return;
     }
 
-    // 结束拖拽，但保留选中的矩形，直到用户手动退出区域选图模式
+    // End drag, but keep selected rectangle until user manually exits region selection mode
     setIsSelectingRegion(false);
     setSelectionStart(null);
 
@@ -500,11 +500,11 @@ export const SlidePreview: React.FC = () => {
       const img = imageRef.current;
       const { left, top, width, height } = selectionRect;
       if (width < 10 || height < 10) {
-        // 选区太小，忽略
+        // Selection too small, ignore
         return;
       }
 
-      // 将选区从展示尺寸映射到原始图片尺寸
+      // Map selection from display size to natural image size
       const naturalWidth = img.naturalWidth;
       const naturalHeight = img.naturalHeight;
       const displayWidth = img.clientWidth;
@@ -542,7 +542,7 @@ export const SlidePreview: React.FC = () => {
         canvas.toBlob((blob) => {
           if (!blob) return;
           const file = new File([blob], `crop-${Date.now()}.png`, { type: 'image/png' });
-          // 把选中区域作为额外参考图片加入上传列表
+          // Add selected area as extra reference image to upload list
           setSelectedContextImages((prev) => ({
             ...prev,
             uploadedFiles: [...prev.uploadedFiles, file],
@@ -1020,9 +1020,9 @@ export const SlidePreview: React.FC = () => {
         </div>
       </header>
 
-      {/* 主内容区 */}
+      {/* Main Content Area */}
       <div className="flex-1 flex flex-col md:flex-row overflow-hidden min-w-0 min-h-0">
-        {/* 左侧：缩略图列表 */}
+        {/* Left: Thumbnail List */}
         <aside className="w-full md:w-80 bg-white border-b md:border-b-0 md:border-r border-gray-200 flex flex-col flex-shrink-0">
           <div className="p-3 md:p-4 border-b border-gray-200 flex-shrink-0 space-y-2 md:space-y-3">
             <Button
@@ -1072,7 +1072,7 @@ export const SlidePreview: React.FC = () => {
             <div className="flex md:flex-col gap-2 md:gap-4 min-w-max md:min-w-0">
               {currentProject.pages.map((page, index) => (
                 <div key={page.id} className="md:w-full flex-shrink-0 relative">
-                  {/* 移动端：简化缩略图 */}
+                  {/* Mobile: simplified thumbnail */}
                   <div className="md:hidden relative">
                     <button
                       onClick={() => {
@@ -1100,7 +1100,7 @@ export const SlidePreview: React.FC = () => {
                         </div>
                       )}
                     </button>
-                    {/* 多选复选框（移动端） */}
+                    {/* Multi-select checkbox (mobile) */}
                     {isMultiSelectMode && page.id && page.generated_image_path && (
                       <button
                         onClick={(e) => {
@@ -1117,9 +1117,9 @@ export const SlidePreview: React.FC = () => {
                       </button>
                     )}
                   </div>
-                  {/* 桌面端：完整卡片 */}
+                  {/* Desktop: full card */}
                   <div className="hidden md:block relative">
-                    {/* 多选复选框（桌面端） */}
+                    {/* Multi-select checkbox (desktop) */}
                     {isMultiSelectMode && page.id && page.generated_image_path && (
                       <button
                         onClick={(e) => {
